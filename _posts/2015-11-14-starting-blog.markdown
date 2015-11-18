@@ -277,5 +277,4 @@ a = 4 -- no language indicated so no synthax highlight here
 - [Steps](https://pages.github.com/) to create a blog on GitHub
 - [Jekyll](https://jekyllrb.com/)
 - Karpathy's [switching from Wordpress to Jekyll](http://karpathy.github.io/2014/07/01/switching-to-jekyll/)
-- Udacity's [How to use git and GitHub](https://www.udacity.com/course/how-to-use-git-and-github--ud775) course
-- Concise [git tutorial](http://rogerdudler.github.io/git-guide/)
+- Git tutorials: [atlassian](https://www.atlassian.com/git/tutorials/setting-up-a-repository), [dudler](http://rogerdudler.github.io/git-guide/), [Udacity](https://www.udacity.com/course/how-to-use-git-and-github--ud775) course
