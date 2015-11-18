@@ -74,17 +74,20 @@
 <p>Make sure you install the latest version of ruby that is compatible with your OS. I run this
 on Ubuntu 14.04</p>
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>sudo apt-get install ruby1.9.1 ruby1.9.1-dev make gcc nodejs git
+<span class="nv">$ </span>gem update --system
 <span class="nv">$ </span>gem install jekyll <span class="c"># or sudo gem install jekyll (you may have to run this command twice)</span>
 </code></pre></div>
 <p>Get a <a href="http://github.com">GitHub</a> account with some <em>username</em>
 Set up a <a href="https://github.com/new">new repository</a> named <em>username</em>.github.io
-Go to the folder where you want to store your blog files and clone the new repository (steps were taken from <a href="https://pages.github.com/">here</a></p>
-<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git clone https://github.com/*username*/*username*.github.io
-<span class="nv">$ </span><span class="nb">cd</span> *username*.github.io
-</code></pre></div>
+Go to the folder where you want to store your blog files and clone the new repository (steps were taken from <a href="https://pages.github.com/">here</a>)
+</code></p>
+
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash"> <span class="nv">$ </span>git clone https://github.com/<em>username</em>/<em>username</em>.github.io
+<span class="nv"> $ </span>cd <em>username</em>.github.io </code></pre></div></p>
+
 <h2>Quick start</h2>
 
-<p>From the folder <code>*username*.github.io</code></p>
+<p>From the folder <code><em>username</em>.github.io</code></p>
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>jekyll new .
 <span class="nv">$ </span>jekyll serve
 </code></pre></div>
@@ -98,9 +101,7 @@ Go to the folder where you want to store your blog files and clone the new repos
 
 <h2>Post to GitHub</h2>
 
-<p>Navigate to your <em>username</em>.github.io folder</p>
-
-<p>Commit to GitHub. Navigate to your <code>*username*.github.io</code> folder</p>
+<p>Navigate to your <code><em>username</em>.github.io</code> folder</p>
 <div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git add --all
 <span class="nv">$ </span>git commit -m <span class="s2">&quot;new blog post&quot;</span>
 <span class="nv">$ </span>git push -u origin master
@@ -293,8 +294,11 @@ a = 4 -- no language indicated so no synthax highlight here
 <h2>Further reading</h2>
 
 <ul>
+<li><a href="https://pages.github.com/">Steps</a> to create a blog on GitHub</li>
 <li><a href="https://jekyllrb.com/">Jekyll</a></li>
 <li>Karpathy&#39;s <a href="http://karpathy.github.io/2014/07/01/switching-to-jekyll/">switching from Wordpress to Jekyll</a></li>
+<li>Udacity&#39;s <a href="https://www.udacity.com/course/how-to-use-git-and-github--ud775">How to use git and GitHub</a> course</li>
+<li>Concise <a href="http://rogerdudler.github.io/git-guide/">git tutorial</a></li>
 </ul>
 
   </article>

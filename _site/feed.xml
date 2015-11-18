@@ -5,8 +5,8 @@
     <description>Andres Rodriguez blog</description>
     <link>http://rodriguezandres.github.io/</link>
     <atom:link href="http://rodriguezandres.github.io/feed.xml" rel="self" type="application/rss+xml"/>
-    <pubDate>Wed, 18 Nov 2015 10:08:33 -0500</pubDate>
-    <lastBuildDate>Wed, 18 Nov 2015 10:08:33 -0500</lastBuildDate>
+    <pubDate>Wed, 18 Nov 2015 11:33:20 -0500</pubDate>
+    <lastBuildDate>Wed, 18 Nov 2015 11:33:20 -0500</lastBuildDate>
     <generator>Jekyll v2.5.3</generator>
     
       <item>
@@ -16,17 +16,20 @@
 &lt;p&gt;Make sure you install the latest version of ruby that is compatible with your OS. I run this
 on Ubuntu 14.04&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;sudo apt-get install ruby1.9.1 ruby1.9.1-dev make gcc nodejs git
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem update --system
 &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem install jekyll &lt;span class=&quot;c&quot;&gt;# or sudo gem install jekyll (you may have to run this command twice)&lt;/span&gt;
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
 &lt;p&gt;Get a &lt;a href=&quot;http://github.com&quot;&gt;GitHub&lt;/a&gt; account with some &lt;em&gt;username&lt;/em&gt;
 Set up a &lt;a href=&quot;https://github.com/new&quot;&gt;new repository&lt;/a&gt; named &lt;em&gt;username&lt;/em&gt;.github.io
-Go to the folder where you want to store your blog files and clone the new repository (steps were taken from &lt;a href=&quot;https://pages.github.com/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
-&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git clone https://github.com/*username*/*username*.github.io
-&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; *username*.github.io
-&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+Go to the folder where you want to store your blog files and clone the new repository (steps were taken from &lt;a href=&quot;https://pages.github.com/&quot;&gt;here&lt;/a&gt;)
+&lt;/code&gt;&lt;/p&gt;
+
+&lt;p&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt; &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git clone https://github.com/&lt;em&gt;username&lt;/em&gt;/&lt;em&gt;username&lt;/em&gt;.github.io
+&lt;span class=&quot;nv&quot;&gt; $ &lt;/span&gt;cd &lt;em&gt;username&lt;/em&gt;.github.io &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;/p&gt;
+
 &lt;h2&gt;Quick start&lt;/h2&gt;
 
-&lt;p&gt;From the folder &lt;code&gt;*username*.github.io&lt;/code&gt;&lt;/p&gt;
+&lt;p&gt;From the folder &lt;code&gt;&lt;em&gt;username&lt;/em&gt;.github.io&lt;/code&gt;&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll new .
 &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll serve
 &lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
@@ -40,9 +43,7 @@ Go to the folder where you want to store your blog files and clone the new repos
 
 &lt;h2&gt;Post to GitHub&lt;/h2&gt;
 
-&lt;p&gt;Navigate to your &lt;em&gt;username&lt;/em&gt;.github.io folder&lt;/p&gt;
-
-&lt;p&gt;Commit to GitHub. Navigate to your &lt;code&gt;*username*.github.io&lt;/code&gt; folder&lt;/p&gt;
+&lt;p&gt;Navigate to your &lt;code&gt;&lt;em&gt;username&lt;/em&gt;.github.io&lt;/code&gt; folder&lt;/p&gt;
 &lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add --all
 &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit -m &lt;span class=&quot;s2&quot;&gt;&amp;quot;new blog post&amp;quot;&lt;/span&gt;
 &lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push -u origin master
@@ -235,8 +236,11 @@ a = 4 -- no language indicated so no synthax highlight here
 &lt;h2&gt;Further reading&lt;/h2&gt;
 
 &lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://pages.github.com/&quot;&gt;Steps&lt;/a&gt; to create a blog on GitHub&lt;/li&gt;
 &lt;li&gt;&lt;a href=&quot;https://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt;&lt;/li&gt;
 &lt;li&gt;Karpathy&amp;#39;s &lt;a href=&quot;http://karpathy.github.io/2014/07/01/switching-to-jekyll/&quot;&gt;switching from Wordpress to Jekyll&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Udacity&amp;#39;s &lt;a href=&quot;https://www.udacity.com/course/how-to-use-git-and-github--ud775&quot;&gt;How to use git and GitHub&lt;/a&gt; course&lt;/li&gt;
+&lt;li&gt;Concise &lt;a href=&quot;http://rogerdudler.github.io/git-guide/&quot;&gt;git tutorial&lt;/a&gt;&lt;/li&gt;
 &lt;/ul&gt;
 </description>
         <pubDate>Mon, 16 Nov 2015 06:00:00 -0500</pubDate>

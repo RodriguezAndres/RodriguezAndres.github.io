@@ -13,19 +13,19 @@ on Ubuntu 14.04
 
 ```bash
 $ sudo apt-get install ruby1.9.1 ruby1.9.1-dev make gcc nodejs git
+$ gem update --system
 $ gem install jekyll # or sudo gem install jekyll (you may have to run this command twice)
 ```
 Get a [GitHub](http://github.com) account with some *username*
 Set up a [new repository](https://github.com/new) named *username*.github.io
-Go to the folder where you want to store your blog files and clone the new repository (steps were taken from [here](https://pages.github.com/)
+Go to the folder where you want to store your blog files and clone the new repository (steps were taken from [here](https://pages.github.com/))
+</code>
 
-```bash
-$ git clone https://github.com/*username*/*username*.github.io
-$ cd *username*.github.io
-```
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash"> <span class="nv">$ </span>git clone https://github.com/<em>username</em>/<em>username</em>.github.io
+<span class="nv"> $ </span>cd <em>username</em>.github.io </code></pre></div></p>
 
 ## Quick start
-From the folder `*username*.github.io`
+From the folder <code>*username*.github.io</code>
 
 ```bash
 $ jekyll new .
@@ -38,10 +38,7 @@ $ jekyll serve
 User only edits files in the `_post` folder and add data or figures to a `data` or `figures` folders created by user, and Jekyll builds the _site content. More information at [Jekyll](http://jekyllrb.com/docs/structure/)
 
 ## Post to GitHub
-Navigate to your *username*.github.io folder
-
-
-Commit to GitHub. Navigate to your `*username*.github.io` folder
+Navigate to your <code>*username*.github.io</code> folder
 
 ```bash
 $ git add --all
@@ -277,5 +274,8 @@ a = 4 -- no language indicated so no synthax highlight here
 ```
 
 ## Further reading
+- [Steps](https://pages.github.com/) to create a blog on GitHub
 - [Jekyll](https://jekyllrb.com/)
 - Karpathy's [switching from Wordpress to Jekyll](http://karpathy.github.io/2014/07/01/switching-to-jekyll/)
+- Udacity's [How to use git and GitHub](https://www.udacity.com/course/how-to-use-git-and-github--ud775) course
+- Concise [git tutorial](http://rogerdudler.github.io/git-guide/)
