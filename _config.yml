@@ -1,0 +1,14 @@
+# Site settings
+title: Keeping up with deep learning
+author: Andres Rodriguez
+email:
+description: "Andres Rodriguez blog"
+baseurl: "" # the subpath of your site, e.g. /blog/
+url: "http://rodriguezandres.github.io" # the base hostname & protocol for your site
+github_username:  rodriguezandres
+#twitter_username: andres-rodriguez-3333212
+linkedin_username: andres-rodriguez-3333212
+
+# Build settings
+markdown: redcarpet
+permalink: pretty

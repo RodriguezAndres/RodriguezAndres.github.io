@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Steps to start a basic GitHub blog using Jekyll</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <title>Steps to start a basic GitHub blog using Jekyll</title>
+  <meta name="description" content="These steps can be used to start a blog">
+
+  <link rel="stylesheet" href="/css/main.css">
+  <link rel="canonical" href="http://rodriguezandres.github.io/2015/11/16/starting-blog/">
+  <link rel="alternate" type="application/rss+xml" title="Keeping up with deep learning" href="http://rodriguezandres.github.io/feed.xml" />
+</head>
+
+
+  <body>
+
+    <header class="site-header">
+
+  <div class="wrapper">
+
+    <div style="float:left; margin-top:10px; margin-right:10px;">
+    <a href="/feed.xml">
+      <img src="/figures/rssicon.svg" width="40">
+    </a>
+    </div>
+
+    <a class="site-title" href="/">Keeping up with deep learning</a>
+
+    <nav class="site-nav">
+      <a href="#" class="menu-icon">
+        <svg viewBox="0 0 18 15">
+          <path fill="#424242" d="M18,1.484c0,0.82-0.665,1.484-1.484,1.484H1.484C0.665,2.969,0,2.304,0,1.484l0,0C0,0.665,0.665,0,1.484,0 h15.031C17.335,0,18,0.665,18,1.484L18,1.484z"/>
+          <path fill="#424242" d="M18,7.516C18,8.335,17.335,9,16.516,9H1.484C0.665,9,0,8.335,0,7.516l0,0c0-0.82,0.665-1.484,1.484-1.484 h15.031C17.335,6.031,18,6.696,18,7.516L18,7.516z"/>
+          <path fill="#424242" d="M18,13.516C18,14.335,17.335,15,16.516,15H1.484C0.665,15,0,14.335,0,13.516l0,0 c0-0.82,0.665-1.484,1.484-1.484h15.031C17.335,12.031,18,12.696,18,13.516L18,13.516z"/>
+        </svg>
+      </a>
+
+      <div class="trigger">
+        
+          
+          <a class="page-link" href="/about/">About</a>
+          
+        
+          
+        
+          
+        
+          
+        
+      </div>
+    </nav>
+
+  </div>
+
+</header>
+
+
+    <div class="page-content">
+      <div class="wrapper">
+        <div class="post">
+
+  <header class="post-header">
+    <h1 class="post-title">Steps to start a basic GitHub blog using Jekyll</h1>
+    <p class="post-meta">Nov 16, 2015</p>
+  </header>
+
+  <article class="post-content">
+    <h2>Installation</h2>
+
+<p>Make sure you install the latest version of ruby that is compatible with your OS. I run this
+on Ubuntu 14.04</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>sudo apt-get install ruby1.9.1 ruby1.9.1-dev make gcc nodejs git
+<span class="nv">$ </span>gem install jekyll <span class="c"># or sudo gem install jekyll (you may have to run this command twice)</span>
+</code></pre></div>
+<p>Get a <a href="http://github.com">GitHub</a> account with some <em>username</em>
+Set up a <a href="https://github.com/new">new repository</a> named <em>username</em>.github.io
+Go to the folder where you want to store your blog files and clone the new repository (steps were taken from <a href="https://pages.github.com/">here</a></p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git clone https://github.com/*username*/*username*.github.io
+<span class="nv">$ </span><span class="nb">cd</span> *username*.github.io
+</code></pre></div>
+<h2>Quick start</h2>
+
+<p>From the folder <code>*username*.github.io</code></p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>jekyll new .
+<span class="nv">$ </span>jekyll serve
+</code></pre></div>
+<ul>
+<li>Browse to <a href="http://localhost:4000">http://localhost:4000</a> to view blog locally</li>
+<li>Create posts like this one under <code>myblog/_post</code></li>
+<li>Add _site to the .gitignore file</li>
+</ul>
+
+<p>User only edits files in the <code>_post</code> folder and add data or figures to a <code>data</code> or <code>figures</code> folders created by user, and Jekyll builds the _site content. More information at <a href="http://jekyllrb.com/docs/structure/">Jekyll</a></p>
+
+<h2>Post to GitHub</h2>
+
+<p>Navigate to your <em>username</em>.github.io folder</p>
+
+<p>Commit to GitHub. Navigate to your <code>*username*.github.io</code> folder</p>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span>git add --all
+<span class="nv">$ </span>git commit -m <span class="s2">&quot;new blog post&quot;</span>
+<span class="nv">$ </span>git push -u origin master
+</code></pre></div>
+<p>A nice simple git tutorial can be found <a href="http://rogerdudler.github.io/git-guide/">here</a></p>
+
+<h2>Improving layout (optional)</h2>
+
+<p>To include TeX, include in <code>_layout/post.html</code> (delete the space between <code>{</code> and <code>%</code>)</p>
+<div class="highlight"><pre><code class="language-html" data-lang="html"><span class="c">&lt;!-- mathjax --\&gt;</span>
+<span class="c">{ % if page.mathjax %}</span>
+<span class="c">&lt;script type=&quot;text/javascript&quot; src=&quot;//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&quot;&gt;&lt;/script&gt;</span>
+<span class="c">{ % endif %}</span>
+</code></pre></div>
+<p>To set the default format of images and caption, include in <code>css/main.scss</code> </p>
+<div class="highlight"><pre><code class="language-scss" data-lang="scss"><span class="nc">.imgright</span> <span class="p">{</span> <span class="na">float</span><span class="o">:</span> <span class="no">right</span><span class="p">;</span> <span class="na">margin-left</span><span class="o">:</span> <span class="mi">10</span><span class="kt">px</span><span class="p">;</span> <span class="p">}</span>
+<span class="nc">.imgcap</span> <span class="nt">img</span> <span class="p">{</span>
+  <span class="na">border</span><span class="o">:</span> <span class="mi">1</span><span class="kt">px</span> <span class="no">solid</span> <span class="mh">#999</span><span class="p">;</span>
+  <span class="na">max-width</span><span class="o">:</span> <span class="mi">100</span><span class="kt">%</span><span class="p">;</span>
+<span class="p">}</span>
+<span class="nc">.imgcap</span> <span class="p">{</span>
+  <span class="na">color</span><span class="o">:</span> <span class="mh">#555</span><span class="p">;</span>
+  <span class="na">font-size</span><span class="o">:</span> <span class="mi">14</span><span class="kt">px</span><span class="p">;</span>
+  <span class="na">text-align</span><span class="o">:</span> <span class="no">center</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div>
+<p>To increase the width of the display, modify the <code>.wrapper</code> definition in  <code>_sass/_base.scss</code> replace the <code>* 2</code>&#39;s with <code>* 1</code>&#39;s</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">.wrapper {
+    max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit} * 1));
+    max-width:         calc(#{$content-width} - (#{$spacing-unit} * 1));
+</code></pre></div>
+<p>To add a linkedin linked icon, include in <code>_include/footer.html</code> (delete the space between <code>{</code> and <code>%</code>) and in <code>_config.yml</code>, respectively</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">          { % if site.linkedin_username %}
+          &lt;li&gt;
+            &lt;a href=&quot;https://www.linkedin.com/in/andres-rodriguez-3333212&quot;&gt;
+              &lt;span class=&quot;icon  icon--linkedin&quot;&gt;
+                &lt;svg viewBox=&quot;0 0 16 16&quot;&gt;
+      &lt;path fill=&quot;#828282&quot; d=&quot;M0.119,5.093l3.224-0.04v10.556l-3.224,0.039V5.093L0.119,5.093z&quot;&gt;&lt;/path&gt;
+      &lt;path fill=&quot;#828282&quot; d=&quot;M6.04,5.093l3.08-0.039v1.342l0.001,0.38c0.91-0.894,1.852-1.57,3.354-1.57c1.773,0,3.486,0.742,3.486,3.163v7.241 l-3.125,0.046v-5.532c0-1.219-0.307-2.005-1.764-2.005c-1.281,0-1.818,0.23-1.818,1.918v5.573L6.04,15.647V5.093L6.04,5.093z&quot;&gt;&lt;/path&gt;
+      &lt;path fill=&quot;#828282&quot; d=&quot;M3.529,1.764c0,0.975-0.79,1.765-1.765,1.765C0.79,3.529,0,2.739,0,1.764S0.79,0,1.764,0C2.739,0,3.529,0.79,3.529,1.764 L3.529,1.764z&quot;&gt;&lt;/path&gt;
+                &lt;/svg&gt;
+              &lt;/span&gt;
+
+              &lt;span class=&quot;username&quot;&gt;andres-rodriguez-3333212&lt;/span&gt;
+            &lt;/a&gt;
+          &lt;/li&gt;
+          { % endif %}
+</code></pre></div><div class="highlight"><pre><code class="language-text" data-lang="text">linkedin_username: &lt;em&gt;linked_username&lt;/em&gt;
+</code></pre></div>
+<h2>Markdown tutorial</h2>
+
+<p>See the Markdown <a href="https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet">cheatsheet</a> for a complete list. In addition here are other formatting techniques and the more common techniques that I use.</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Separate lines in the Markdown text are concatinated in the blog, e.g.,
+this shows up as one line
+</code></pre></div>
+<p>Separate lines in the Markdown text are concatinated in the blog, e.g.,
+this shows up as one line</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Separate lines in the Markdown text trailed by two spaces are not concatinated in the blog, e.g.,  
+  this shows up as two lines
+</code></pre></div>
+<p>Separate lines in the Markdown text trailed by two spaces are not concatinated in the blog, e.g.,<br>
+  this shows up as two lines</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">**bold** or *italics* or **_both_** or &lt;s&gt;strikethrough&lt;/s&gt;. 
+Note that ~~strikethrough~~ should work but it&#39;s not working for me
+</code></pre></div>
+<p><strong>bold</strong> or <em>italics</em> or <strong><em>both</em></strong> or <s>strikethrough</s>. 
+Note that ~~strikethrough~~ should work but it&#39;s not working for me</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">&gt; Indent and italicized text
+</code></pre></div>
+<blockquote>
+<p>Indent and italicized text</p>
+</blockquote>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Bullet points:
+
+- bullet 1
+
+- bullet 2
+</code></pre></div>
+<p>Bullet points:</p>
+
+<ul>
+<li><p>bullet 1</p></li>
+<li><p>bullet 2</p></li>
+</ul>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Lists:
+
+1. First
+  * sublist item
+  * sublist another item
+2. Second
+  1. numbered sublist item 1
+  1. numbered sublist item 2
+1. Third (in Markdown actual numbers don&#39;t matter; only that is a number)
+1. Forth
+</code></pre></div>
+<p>Lists:</p>
+
+<ol>
+<li>First
+
+<ul>
+<li>sublist item</li>
+<li>sublist another item</li>
+</ul></li>
+<li>Second
+
+<ol>
+<li>numbered sublist item 1</li>
+<li>numbered sublist item 2</li>
+</ol></li>
+<li>Third (in Markdown actual numbers don&#39;t matter; only that is a number)</li>
+<li>Forth</li>
+</ol>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Create a [hyperlink](http://hyperlink.com)  
+  Create a [hyperlink](http://hyperlink.com &quot;Title&quot;) that displays the title 
+if you put your mouse over it
+</code></pre></div>
+<p>Create a <a href="http://hyperlink.com">hyperlink</a><br>
+  Create a <a href="http://hyperlink.com" title="Title">hyperlink</a> that displays the title 
+if you put your mouse over it</p>
+<div class="highlight"><pre><code class="language-text" data-lang="text">&lt;div class=&quot;imgcap&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; style=&quot;border:none;&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; width=&quot;10%&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; width=&quot;30%&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; style=&quot;max-width:10%; height:200px;&quot; --&gt;
+&lt;div class=&quot;thecap&quot; style=&quot;text-align:justify&quot;&gt;Caption: Inserting 
+figures with various settings: &lt;b&gt;(1)&lt;/b&gt; Unaltered image. &lt;b&gt;(2)&lt;/b&gt; No border. 
+&lt;b&gt;(3)&lt;/b&gt; Width takes 10% of screen width. &lt;b&gt;(4)&lt;/b&gt; Width takes 30% of the 
+screen. &lt;b&gt;(5)&lt;/b&gt; Width takes 10% of the screen and the height is 200 pixels.
+&lt;/div&gt;
+&lt;div class=&quot;thecap&quot; style=&quot;text-align:justify; font-size:90%&quot;&gt;And here is a 
+different way to format the font size in captions
+&lt;/div&gt;&lt;/div&gt;
+</code></pre></div>
+<div class="imgcap">
+<img src="/figures/tutorial.jpg">
+<img src="/figures/tutorial.jpg" style="border:none;">
+<img src="/figures/tutorial.jpg" width="10%">
+<img src="/figures/tutorial.jpg" width="30%">
+<img src="/figures/tutorial.jpg" style="max-width:10%; height:200px;" -->
+<div class="thecap" style="text-align:justify">Caption: Inserting 
+figures with various settings: <b>(1)</b> Unaltered image. <b>(2)</b> No border. 
+<b>(3)</b> Width takes 10% of screen width. <b>(4)</b> Width takes 30% of the 
+screen. <b>(5)</b> Width takes 10% of the screen and the height is 200 pixels.
+</div>
+
+<div class="thecap" style="text-align:justify; font-size:90%">And here is a 
+different way to format the font size in captions
+</div></div>
+<div class="highlight"><pre><code class="language-text" data-lang="text">Inline variables `a` and `b` can be used in equations \\( h\_t = \tanh ( a\_{t} b\_{t} ) \\) (requires MathJax--add it to `_layout/post.html`)
+</code></pre></div>
+<p>Inline variables <code>a</code> and <code>b</code> can be used in equations \( h_t = \tanh ( a_{t} b_{t} ) \) (requires MathJax--add it to <code>_layout/post.html</code>)</p>
+
+<pre>
+```bash
+$ cd myblog # simple Bash command
+```
+
+```python
+def main():
+  a = 4 # simply Python code
+```
+
+```c
+int main() {
+  a = 4; // simply C/C++ code
+  return 0;
+}
+```
+
+```javascript
+$('.promoted').hide(); // simple Javascript code
+```
+
+```
+a = 4 -- no language indicated so no synthax highlight here
+```
+</pre>
+<div class="highlight"><pre><code class="language-bash" data-lang="bash"><span class="nv">$ </span><span class="nb">cd </span>myblog <span class="c"># simple Bash command</span>
+</code></pre></div><div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">def</span> <span class="nf">main</span><span class="p">():</span>
+  <span class="n">a</span> <span class="o">=</span> <span class="mi">4</span> <span class="c"># simply Python code</span>
+</code></pre></div><div class="highlight"><pre><code class="language-c" data-lang="c"><span class="kt">int</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
+  <span class="n">a</span> <span class="o">=</span> <span class="mi">4</span><span class="p">;</span> <span class="c1">// simply C/C++ code</span>
+  <span class="k">return</span> <span class="mi">0</span><span class="p">;</span>
+<span class="p">}</span>
+</code></pre></div><div class="highlight"><pre><code class="language-javascript" data-lang="javascript"><span class="nx">$</span><span class="p">(</span><span class="s1">&#39;.promoted&#39;</span><span class="p">).</span><span class="nx">hide</span><span class="p">();</span> <span class="c1">// simple Javascript code</span>
+</code></pre></div><div class="highlight"><pre><code class="language-text" data-lang="text">a = 4 -- no language indicated so no synthax highlight here
+</code></pre></div>
+<h2>Further reading</h2>
+
+<ul>
+<li><a href="https://jekyllrb.com/">Jekyll</a></li>
+<li>Karpathy&#39;s <a href="http://karpathy.github.io/2014/07/01/switching-to-jekyll/">switching from Wordpress to Jekyll</a></li>
+</ul>
+
+  </article>
+
+  <!-- mathjax -->
+  
+  <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  
+</div>
+
+      </div>
+    </div>
+
+    <footer class="site-footer">
+
+  <div class="wrapper">
+
+    <!-- <h2 class="footer-heading">Keeping up with deep learning</h2> -->
+
+    <div class="footer-col-wrapper">
+      <div class="footer-col  footer-col-1">
+        <ul class="contact-list">
+          <li>Keeping up with deep learning</li>
+          <li><a href="mailto:"></a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-2">
+        <ul class="social-media-list">
+          
+          <li>
+            <a href="https://github.com/rodriguezandres">
+              <span class="icon  icon--github">
+                <svg viewBox="0 0 16 16">
+                  <path fill="#828282" d="M7.999,0.431c-4.285,0-7.76,3.474-7.76,7.761 c0,3.428,2.223,6.337,5.307,7.363c0.388,0.071,0.53-0.168,0.53-0.374c0-0.184-0.007-0.672-0.01-1.32 c-2.159,0.469-2.614-1.04-2.614-1.04c-0.353-0.896-0.862-1.135-0.862-1.135c-0.705-0.481,0.053-0.472,0.053-0.472 c0.779,0.055,1.189,0.8,1.189,0.8c0.692,1.186,1.816,0.843,2.258,0.645c0.071-0.502,0.271-0.843,0.493-1.037 C4.86,11.425,3.049,10.76,3.049,7.786c0-0.847,0.302-1.54,0.799-2.082C3.768,5.507,3.501,4.718,3.924,3.65 c0,0,0.652-0.209,2.134,0.796C6.677,4.273,7.34,4.187,8,4.184c0.659,0.003,1.323,0.089,1.943,0.261 c1.482-1.004,2.132-0.796,2.132-0.796c0.423,1.068,0.157,1.857,0.077,2.054c0.497,0.542,0.798,1.235,0.798,2.082 c0,2.981-1.814,3.637-3.543,3.829c0.279,0.24,0.527,0.713,0.527,1.437c0,1.037-0.01,1.874-0.01,2.129 c0,0.208,0.14,0.449,0.534,0.373c3.081-1.028,5.302-3.935,5.302-7.362C15.76,3.906,12.285,0.431,7.999,0.431z"/>
+                </svg>
+              </span>
+
+              <span class="username">rodriguezandres</span>
+            </a>
+          </li>
+          
+
+          
+
+          
+          <li>
+            <a href="https://www.linkedin.com/in/andres-rodriguez-3333212">
+              <span class="icon  icon--linkedin">
+                <svg viewBox="0 0 16 16">
+      <path fill="#828282" d="M0.119,5.093l3.224-0.04v10.556l-3.224,0.039V5.093L0.119,5.093z"></path>
+      <path fill="#828282" d="M6.04,5.093l3.08-0.039v1.342l0.001,0.38c0.91-0.894,1.852-1.57,3.354-1.57c1.773,0,3.486,0.742,3.486,3.163v7.241 l-3.125,0.046v-5.532c0-1.219-0.307-2.005-1.764-2.005c-1.281,0-1.818,0.23-1.818,1.918v5.573L6.04,15.647V5.093L6.04,5.093z"></path>
+      <path fill="#828282" d="M3.529,1.764c0,0.975-0.79,1.765-1.765,1.765C0.79,3.529,0,2.739,0,1.764S0.79,0,1.764,0C2.739,0,3.529,0.79,3.529,1.764 L3.529,1.764z"></path>
+                </svg>
+              </span>
+
+              <span class="username">andresrodriguez</span>
+            </a>
+          </li>
+          
+        </ul>
+      </div>
+
+      <div class="footer-col  footer-col-3">
+        <p class="text">Andres Rodriguez blog</p>
+      </div>
+    </div>
+
+  </div>
+
+</footer>
+
+
+  </body>
+
+</html>

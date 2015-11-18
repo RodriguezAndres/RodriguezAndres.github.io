@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Keeping up with deep learning</title>
+    <description>Andres Rodriguez blog</description>
+    <link>http://rodriguezandres.github.io/</link>
+    <atom:link href="http://rodriguezandres.github.io/feed.xml" rel="self" type="application/rss+xml"/>
+    <pubDate>Wed, 18 Nov 2015 10:08:33 -0500</pubDate>
+    <lastBuildDate>Wed, 18 Nov 2015 10:08:33 -0500</lastBuildDate>
+    <generator>Jekyll v2.5.3</generator>
+    
+      <item>
+        <title>Steps to start a basic GitHub blog using Jekyll</title>
+        <description>&lt;h2&gt;Installation&lt;/h2&gt;
+
+&lt;p&gt;Make sure you install the latest version of ruby that is compatible with your OS. I run this
+on Ubuntu 14.04&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;sudo apt-get install ruby1.9.1 ruby1.9.1-dev make gcc nodejs git
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;gem install jekyll &lt;span class=&quot;c&quot;&gt;# or sudo gem install jekyll (you may have to run this command twice)&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Get a &lt;a href=&quot;http://github.com&quot;&gt;GitHub&lt;/a&gt; account with some &lt;em&gt;username&lt;/em&gt;
+Set up a &lt;a href=&quot;https://github.com/new&quot;&gt;new repository&lt;/a&gt; named &lt;em&gt;username&lt;/em&gt;.github.io
+Go to the folder where you want to store your blog files and clone the new repository (steps were taken from &lt;a href=&quot;https://pages.github.com/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git clone https://github.com/*username*/*username*.github.io
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd&lt;/span&gt; *username*.github.io
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Quick start&lt;/h2&gt;
+
+&lt;p&gt;From the folder &lt;code&gt;*username*.github.io&lt;/code&gt;&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll new .
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;jekyll serve
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;ul&gt;
+&lt;li&gt;Browse to &lt;a href=&quot;http://localhost:4000&quot;&gt;http://localhost:4000&lt;/a&gt; to view blog locally&lt;/li&gt;
+&lt;li&gt;Create posts like this one under &lt;code&gt;myblog/_post&lt;/code&gt;&lt;/li&gt;
+&lt;li&gt;Add _site to the .gitignore file&lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;p&gt;User only edits files in the &lt;code&gt;_post&lt;/code&gt; folder and add data or figures to a &lt;code&gt;data&lt;/code&gt; or &lt;code&gt;figures&lt;/code&gt; folders created by user, and Jekyll builds the _site content. More information at &lt;a href=&quot;http://jekyllrb.com/docs/structure/&quot;&gt;Jekyll&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Post to GitHub&lt;/h2&gt;
+
+&lt;p&gt;Navigate to your &lt;em&gt;username&lt;/em&gt;.github.io folder&lt;/p&gt;
+
+&lt;p&gt;Commit to GitHub. Navigate to your &lt;code&gt;*username*.github.io&lt;/code&gt; folder&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git add --all
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git commit -m &lt;span class=&quot;s2&quot;&gt;&amp;quot;new blog post&amp;quot;&lt;/span&gt;
+&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;git push -u origin master
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;A nice simple git tutorial can be found &lt;a href=&quot;http://rogerdudler.github.io/git-guide/&quot;&gt;here&lt;/a&gt;&lt;/p&gt;
+
+&lt;h2&gt;Improving layout (optional)&lt;/h2&gt;
+
+&lt;p&gt;To include TeX, include in &lt;code&gt;_layout/post.html&lt;/code&gt; (delete the space between &lt;code&gt;{&lt;/code&gt; and &lt;code&gt;%&lt;/code&gt;)&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-html&quot; data-lang=&quot;html&quot;&gt;&lt;span class=&quot;c&quot;&gt;&amp;lt;!-- mathjax --\&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;{ % if page.mathjax %}&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;&amp;lt;script type=&amp;quot;text/javascript&amp;quot; src=&amp;quot;//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML&amp;quot;&amp;gt;&amp;lt;/script&amp;gt;&lt;/span&gt;
+&lt;span class=&quot;c&quot;&gt;{ % endif %}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To set the default format of images and caption, include in &lt;code&gt;css/main.scss&lt;/code&gt; &lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-scss&quot; data-lang=&quot;scss&quot;&gt;&lt;span class=&quot;nc&quot;&gt;.imgright&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;float&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;right&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;na&quot;&gt;margin-left&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;10&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nc&quot;&gt;.imgcap&lt;/span&gt; &lt;span class=&quot;nt&quot;&gt;img&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;border&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;1&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;px&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;solid&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;#999&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;max-width&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;100&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;%&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;span class=&quot;nc&quot;&gt;.imgcap&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;color&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mh&quot;&gt;#555&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;font-size&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;14&lt;/span&gt;&lt;span class=&quot;kt&quot;&gt;px&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+  &lt;span class=&quot;na&quot;&gt;text-align&lt;/span&gt;&lt;span class=&quot;o&quot;&gt;:&lt;/span&gt; &lt;span class=&quot;no&quot;&gt;center&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To increase the width of the display, modify the &lt;code&gt;.wrapper&lt;/code&gt; definition in  &lt;code&gt;_sass/_base.scss&lt;/code&gt; replace the &lt;code&gt;* 2&lt;/code&gt;&amp;#39;s with &lt;code&gt;* 1&lt;/code&gt;&amp;#39;s&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;.wrapper {
+    max-width: -webkit-calc(#{$content-width} - (#{$spacing-unit} * 1));
+    max-width:         calc(#{$content-width} - (#{$spacing-unit} * 1));
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;To add a linkedin linked icon, include in &lt;code&gt;_include/footer.html&lt;/code&gt; (delete the space between &lt;code&gt;{&lt;/code&gt; and &lt;code&gt;%&lt;/code&gt;) and in &lt;code&gt;_config.yml&lt;/code&gt;, respectively&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;          { % if site.linkedin_username %}
+          &amp;lt;li&amp;gt;
+            &amp;lt;a href=&amp;quot;https://www.linkedin.com/in/andres-rodriguez-3333212&amp;quot;&amp;gt;
+              &amp;lt;span class=&amp;quot;icon  icon--linkedin&amp;quot;&amp;gt;
+                &amp;lt;svg viewBox=&amp;quot;0 0 16 16&amp;quot;&amp;gt;
+      &amp;lt;path fill=&amp;quot;#828282&amp;quot; d=&amp;quot;M0.119,5.093l3.224-0.04v10.556l-3.224,0.039V5.093L0.119,5.093z&amp;quot;&amp;gt;&amp;lt;/path&amp;gt;
+      &amp;lt;path fill=&amp;quot;#828282&amp;quot; d=&amp;quot;M6.04,5.093l3.08-0.039v1.342l0.001,0.38c0.91-0.894,1.852-1.57,3.354-1.57c1.773,0,3.486,0.742,3.486,3.163v7.241 l-3.125,0.046v-5.532c0-1.219-0.307-2.005-1.764-2.005c-1.281,0-1.818,0.23-1.818,1.918v5.573L6.04,15.647V5.093L6.04,5.093z&amp;quot;&amp;gt;&amp;lt;/path&amp;gt;
+      &amp;lt;path fill=&amp;quot;#828282&amp;quot; d=&amp;quot;M3.529,1.764c0,0.975-0.79,1.765-1.765,1.765C0.79,3.529,0,2.739,0,1.764S0.79,0,1.764,0C2.739,0,3.529,0.79,3.529,1.764 L3.529,1.764z&amp;quot;&amp;gt;&amp;lt;/path&amp;gt;
+                &amp;lt;/svg&amp;gt;
+              &amp;lt;/span&amp;gt;
+
+              &amp;lt;span class=&amp;quot;username&amp;quot;&amp;gt;andres-rodriguez-3333212&amp;lt;/span&amp;gt;
+            &amp;lt;/a&amp;gt;
+          &amp;lt;/li&amp;gt;
+          { % endif %}
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;linkedin_username: &amp;lt;em&amp;gt;linked_username&amp;lt;/em&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Markdown tutorial&lt;/h2&gt;
+
+&lt;p&gt;See the Markdown &lt;a href=&quot;https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet&quot;&gt;cheatsheet&lt;/a&gt; for a complete list. In addition here are other formatting techniques and the more common techniques that I use.&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Separate lines in the Markdown text are concatinated in the blog, e.g.,
+this shows up as one line
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Separate lines in the Markdown text are concatinated in the blog, e.g.,
+this shows up as one line&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Separate lines in the Markdown text trailed by two spaces are not concatinated in the blog, e.g.,  
+  this shows up as two lines
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Separate lines in the Markdown text trailed by two spaces are not concatinated in the blog, e.g.,&lt;br&gt;
+  this shows up as two lines&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;**bold** or *italics* or **_both_** or &amp;lt;s&amp;gt;strikethrough&amp;lt;/s&amp;gt;. 
+Note that ~~strikethrough~~ should work but it&amp;#39;s not working for me
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; or &lt;em&gt;italics&lt;/em&gt; or &lt;strong&gt;&lt;em&gt;both&lt;/em&gt;&lt;/strong&gt; or &lt;s&gt;strikethrough&lt;/s&gt;. 
+Note that ~~strikethrough~~ should work but it&amp;#39;s not working for me&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&amp;gt; Indent and italicized text
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;blockquote&gt;
+&lt;p&gt;Indent and italicized text&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Bullet points:
+
+- bullet 1
+
+- bullet 2
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Bullet points:&lt;/p&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;p&gt;bullet 1&lt;/p&gt;&lt;/li&gt;
+&lt;li&gt;&lt;p&gt;bullet 2&lt;/p&gt;&lt;/li&gt;
+&lt;/ul&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Lists:
+
+1. First
+  * sublist item
+  * sublist another item
+2. Second
+  1. numbered sublist item 1
+  1. numbered sublist item 2
+1. Third (in Markdown actual numbers don&amp;#39;t matter; only that is a number)
+1. Forth
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Lists:&lt;/p&gt;
+
+&lt;ol&gt;
+&lt;li&gt;First
+
+&lt;ul&gt;
+&lt;li&gt;sublist item&lt;/li&gt;
+&lt;li&gt;sublist another item&lt;/li&gt;
+&lt;/ul&gt;&lt;/li&gt;
+&lt;li&gt;Second
+
+&lt;ol&gt;
+&lt;li&gt;numbered sublist item 1&lt;/li&gt;
+&lt;li&gt;numbered sublist item 2&lt;/li&gt;
+&lt;/ol&gt;&lt;/li&gt;
+&lt;li&gt;Third (in Markdown actual numbers don&amp;#39;t matter; only that is a number)&lt;/li&gt;
+&lt;li&gt;Forth&lt;/li&gt;
+&lt;/ol&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Create a [hyperlink](http://hyperlink.com)  
+  Create a [hyperlink](http://hyperlink.com &amp;quot;Title&amp;quot;) that displays the title 
+if you put your mouse over it
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Create a &lt;a href=&quot;http://hyperlink.com&quot;&gt;hyperlink&lt;/a&gt;&lt;br&gt;
+  Create a &lt;a href=&quot;http://hyperlink.com&quot; title=&quot;Title&quot;&gt;hyperlink&lt;/a&gt; that displays the title 
+if you put your mouse over it&lt;/p&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;&amp;lt;div class=&amp;quot;imgcap&amp;quot;&amp;gt;
+&amp;lt;img src=&amp;quot;/figures/tutorial.jpg&amp;quot;&amp;gt;
+&amp;lt;img src=&amp;quot;/figures/tutorial.jpg&amp;quot; style=&amp;quot;border:none;&amp;quot;&amp;gt;
+&amp;lt;img src=&amp;quot;/figures/tutorial.jpg&amp;quot; width=&amp;quot;10%&amp;quot;&amp;gt;
+&amp;lt;img src=&amp;quot;/figures/tutorial.jpg&amp;quot; width=&amp;quot;30%&amp;quot;&amp;gt;
+&amp;lt;img src=&amp;quot;/figures/tutorial.jpg&amp;quot; style=&amp;quot;max-width:10%; height:200px;&amp;quot; --&amp;gt;
+&amp;lt;div class=&amp;quot;thecap&amp;quot; style=&amp;quot;text-align:justify&amp;quot;&amp;gt;Caption: Inserting 
+figures with various settings: &amp;lt;b&amp;gt;(1)&amp;lt;/b&amp;gt; Unaltered image. &amp;lt;b&amp;gt;(2)&amp;lt;/b&amp;gt; No border. 
+&amp;lt;b&amp;gt;(3)&amp;lt;/b&amp;gt; Width takes 10% of screen width. &amp;lt;b&amp;gt;(4)&amp;lt;/b&amp;gt; Width takes 30% of the 
+screen. &amp;lt;b&amp;gt;(5)&amp;lt;/b&amp;gt; Width takes 10% of the screen and the height is 200 pixels.
+&amp;lt;/div&amp;gt;
+&amp;lt;div class=&amp;quot;thecap&amp;quot; style=&amp;quot;text-align:justify; font-size:90%&amp;quot;&amp;gt;And here is a 
+different way to format the font size in captions
+&amp;lt;/div&amp;gt;&amp;lt;/div&amp;gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;div class=&quot;imgcap&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; style=&quot;border:none;&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; width=&quot;10%&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; width=&quot;30%&quot;&gt;
+&lt;img src=&quot;/figures/tutorial.jpg&quot; style=&quot;max-width:10%; height:200px;&quot; --&gt;
+&lt;div class=&quot;thecap&quot; style=&quot;text-align:justify&quot;&gt;Caption: Inserting 
+figures with various settings: &lt;b&gt;(1)&lt;/b&gt; Unaltered image. &lt;b&gt;(2)&lt;/b&gt; No border. 
+&lt;b&gt;(3)&lt;/b&gt; Width takes 10% of screen width. &lt;b&gt;(4)&lt;/b&gt; Width takes 30% of the 
+screen. &lt;b&gt;(5)&lt;/b&gt; Width takes 10% of the screen and the height is 200 pixels.
+&lt;/div&gt;
+
+&lt;div class=&quot;thecap&quot; style=&quot;text-align:justify; font-size:90%&quot;&gt;And here is a 
+different way to format the font size in captions
+&lt;/div&gt;&lt;/div&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;Inline variables `a` and `b` can be used in equations \\( h\_t = \tanh ( a\_{t} b\_{t} ) \\) (requires MathJax--add it to `_layout/post.html`)
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;p&gt;Inline variables &lt;code&gt;a&lt;/code&gt; and &lt;code&gt;b&lt;/code&gt; can be used in equations \( h_t = \tanh ( a_{t} b_{t} ) \) (requires MathJax--add it to &lt;code&gt;_layout/post.html&lt;/code&gt;)&lt;/p&gt;
+
+&lt;pre&gt;
+```bash
+$ cd myblog # simple Bash command
+```
+
+```python
+def main():
+  a = 4 # simply Python code
+```
+
+```c
+int main() {
+  a = 4; // simply C/C++ code
+  return 0;
+}
+```
+
+```javascript
+$('.promoted').hide(); // simple Javascript code
+```
+
+```
+a = 4 -- no language indicated so no synthax highlight here
+```
+&lt;/pre&gt;
+&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-bash&quot; data-lang=&quot;bash&quot;&gt;&lt;span class=&quot;nv&quot;&gt;$ &lt;/span&gt;&lt;span class=&quot;nb&quot;&gt;cd &lt;/span&gt;myblog &lt;span class=&quot;c&quot;&gt;# simple Bash command&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-python&quot; data-lang=&quot;python&quot;&gt;&lt;span class=&quot;k&quot;&gt;def&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;():&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt; &lt;span class=&quot;c&quot;&gt;# simply Python code&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-c&quot; data-lang=&quot;c&quot;&gt;&lt;span class=&quot;kt&quot;&gt;int&lt;/span&gt; &lt;span class=&quot;nf&quot;&gt;main&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;()&lt;/span&gt; &lt;span class=&quot;p&quot;&gt;{&lt;/span&gt;
+  &lt;span class=&quot;n&quot;&gt;a&lt;/span&gt; &lt;span class=&quot;o&quot;&gt;=&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;4&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// simply C/C++ code&lt;/span&gt;
+  &lt;span class=&quot;k&quot;&gt;return&lt;/span&gt; &lt;span class=&quot;mi&quot;&gt;0&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;;&lt;/span&gt;
+&lt;span class=&quot;p&quot;&gt;}&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-javascript&quot; data-lang=&quot;javascript&quot;&gt;&lt;span class=&quot;nx&quot;&gt;$&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;(&lt;/span&gt;&lt;span class=&quot;s1&quot;&gt;&amp;#39;.promoted&amp;#39;&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;).&lt;/span&gt;&lt;span class=&quot;nx&quot;&gt;hide&lt;/span&gt;&lt;span class=&quot;p&quot;&gt;();&lt;/span&gt; &lt;span class=&quot;c1&quot;&gt;// simple Javascript code&lt;/span&gt;
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;div class=&quot;highlight&quot;&gt;&lt;pre&gt;&lt;code class=&quot;language-text&quot; data-lang=&quot;text&quot;&gt;a = 4 -- no language indicated so no synthax highlight here
+&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;
+&lt;h2&gt;Further reading&lt;/h2&gt;
+
+&lt;ul&gt;
+&lt;li&gt;&lt;a href=&quot;https://jekyllrb.com/&quot;&gt;Jekyll&lt;/a&gt;&lt;/li&gt;
+&lt;li&gt;Karpathy&amp;#39;s &lt;a href=&quot;http://karpathy.github.io/2014/07/01/switching-to-jekyll/&quot;&gt;switching from Wordpress to Jekyll&lt;/a&gt;&lt;/li&gt;
+&lt;/ul&gt;
+</description>
+        <pubDate>Mon, 16 Nov 2015 06:00:00 -0500</pubDate>
+        <link>http://rodriguezandres.github.io/2015/11/16/starting-blog/</link>
+        <guid isPermaLink="true">http://rodriguezandres.github.io/2015/11/16/starting-blog/</guid>
+        
+        
+      </item>
+    
+  </channel>
+</rss>
