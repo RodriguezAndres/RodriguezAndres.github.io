@@ -18,7 +18,7 @@ $ gem install jekyll # or sudo gem install jekyll (you may have to run this comm
 ```
 Get a [GitHub](http://github.com) account with some *username*
 Set up a [new repository](https://github.com/new) named *username*.github.io
-Go to the folder where you want to store your blog files and clone the new repository (steps were taken from [here](https://pages.github.com/))
+Go to the folder where you want to store your blog files and clone the new repository
 </code>
 
 <p><div class="highlight"><pre><code class="language-bash" data-lang="bash"> <span class="nv">$ </span>git clone https://github.com/<em>username</em>/<em>username</em>.github.io
@@ -38,7 +38,15 @@ $ jekyll serve
 User only edits files in the `_post` folder and add data or figures to a `data` or `figures` folders created by user, and Jekyll builds the _site content. More information at [Jekyll](http://jekyllrb.com/docs/structure/)
 
 ## Post to GitHub
-Navigate to your <code>*username*.github.io</code> folder
+Navigate to your <code>*username*.github.io</code> folder. It's a good idea to create a `.gitignore` file and ignore the `_site` directory and temporary files (e.g., `.swp`, `*~`, etc). The `_site` directory is build based on the code and used to run the blog locally; GitHub does not use it.
+
+``bash
+$ echo "_site" >> .gitignore
+$ echo "_post/*swp" >> .gitignore
+$ echo "_post/*~" >> .gitignore
+```
+
+First commit...
 
 ```bash
 $ git add --all
@@ -46,7 +54,14 @@ $ git commit -m "new blog post"
 $ git push -u origin master
 ```
 
-A nice simple git tutorial can be found [here](http://rogerdudler.github.io/git-guide/)
+Git creates a local repository. To update the master repository (the GitHub blog): add the changed files, commit the changes to the local repository, and push it to the master repository. Note that every file that will be committed needs to be added (this is different use of `add` than SVN).
+
+```bash
+$ git status # view the files that have been changed and decide which ones to add
+$ git add _post/mypost.md
+$ git commit -m "added cool stuff to mypost"
+$ git push origin master
+```
 
 ## Improving layout (optional)
 To include TeX, include in `_layout/post.html` (delete the space between `{` and `%`)
@@ -103,6 +118,8 @@ To add a linkedin linked icon, include in `_include/footer.html` (delete the spa
 ```
 linkedin_username: <em>linked_username</em>
 ```
+
+Disquis is commonly used for a comments section.
 
 ## Markdown tutorial
 See the Markdown [cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) for a complete list. In addition here are other formatting techniques and the more common techniques that I use.
@@ -277,4 +294,4 @@ a = 4 -- no language indicated so no synthax highlight here
 - [Steps](https://pages.github.com/) to create a blog on GitHub
 - [Jekyll](https://jekyllrb.com/)
 - Karpathy's [switching from Wordpress to Jekyll](http://karpathy.github.io/2014/07/01/switching-to-jekyll/)
-- Git tutorials: [atlassian](https://www.atlassian.com/git/tutorials/setting-up-a-repository), [dudler](http://rogerdudler.github.io/git-guide/), [Udacity](https://www.udacity.com/course/how-to-use-git-and-github--ud775) course
+- Git tutorials: [Atlassian](https://www.atlassian.com/git/tutorials/setting-up-a-repository), [Dudler](http://rogerdudler.github.io/git-guide/), [Udacity](https://www.udacity.com/course/how-to-use-git-and-github--ud775)
