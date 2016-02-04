@@ -1,3 +1,7 @@
 _site
-_post/*.swp
+.sass-cache
+.jekyll-metadata
+*~
+*swp
+_post/*swp
 _post/*~
