@@ -3,7 +3,7 @@ layout: post
 comments: true
 title:  "Steps to start a basic GitHub blog using Jekyll"
 excerpt: "These steps can be used to start a blog"
-date:   2015-11-16 11:00:00
+date:   2016-02-03 23:00:00
 mathjax: true
 ---
 
@@ -12,24 +12,30 @@ Make sure you install the latest version of ruby that is compatible with your OS
 on Ubuntu 14.04
 
 ```bash
-$ sudo apt-get install ruby1.9.1 ruby1.9.1-dev make gcc nodejs git
-$ gem update --system
-$ gem install jekyll # or sudo gem install jekyll (you may have to run this command twice)
+# Adding the ruby repository
+sudo apt-get install software-properties-common
+sudo apt-add-repository ppa:brightbox/ruby-ng
+sudo apt-get update
+
+sudo apt-get install ruby2.2 ruby2.2-dev make gcc nodejs git
+sudo gem update --system
+sudo gem install jekyll
+sudo gem install redcarpet
 ```
 Get a [GitHub](http://github.com) account with some *username*
 Set up a [new repository](https://github.com/new) named *username*.github.io
 Go to the folder where you want to store your blog files and clone the new repository
 </code>
 
-<p><div class="highlight"><pre><code class="language-bash" data-lang="bash"> <span class="nv">$ </span>git clone https://github.com/<em>username</em>/<em>username</em>.github.io
-<span class="nv"> $ </span>cd <em>username</em>.github.io </code></pre></div></p>
+<p><div class="highlight"><pre><code class="language-bash" data-lang="bash"> <span class="nv"></span>git clone https://github.com/<em>username</em>/<em>username</em>.github.io
+<span class="nv"> </span>cd <em>username</em>.github.io </code></pre></div></p>
 
 ## Quick start
 From the folder <code>*username*.github.io</code>
 
 ```bash
-$ jekyll new .
-$ jekyll serve
+jekyll new . # only for new projects
+jekyll serve
 ```
 - Browse to [http://localhost:4000](http://localhost:4000) to view blog locally
 - Create posts like this one under `myblog/_post`
@@ -40,27 +46,27 @@ User only edits files in the `_post` folder and add data or figures to a `data` 
 ## Post to GitHub
 Navigate to your <code>*username*.github.io</code> folder. It's a good idea to create a `.gitignore` file and ignore the `_site` directory and temporary files (e.g., `.swp`, `*~`, etc). The `_site` directory is build based on the code and used to run the blog locally; GitHub does not use it.
 
-``bash
-$ echo "_site" >> .gitignore
-$ echo "_post/*swp" >> .gitignore
-$ echo "_post/*~" >> .gitignore
+```bash
+echo "_site" >> .gitignore
+echo "_post/*swp" >> .gitignore
+echo "_post/*~" >> .gitignore
 ```
 
 First commit...
 
 ```bash
-$ git add --all
-$ git commit -m "new blog post"
-$ git push -u origin master
+git add --all
+git commit -m "new blog post"
+git push -u origin master
 ```
 
 Git creates a local repository. To update the master repository (the GitHub blog): add the changed files, commit the changes to the local repository, and push it to the master repository. Note that every file that will be committed needs to be added (this is different use of `add` than SVN).
 
 ```bash
-$ git status # view the files that have been changed and decide which ones to add
-$ git add _post/mypost.md
-$ git commit -m "added cool stuff to mypost"
-$ git push origin master
+git status # view the files that have been changed and decide which ones to add
+git add _post/mypost.md
+git commit -m "added cool stuff to mypost"
+git push origin master
 ```
 
 ## Improving layout (optional)
@@ -119,7 +125,15 @@ To add a linkedin linked icon, include in `_include/footer.html` (delete the spa
 linkedin_username: <em>linked_username</em>
 ```
 
-Disquis is commonly used for a comments section.
+## Adding a comments section
+- Register your blog at [Disqus](https://disqus.com/)
+- Copy the `_include/comments.html` file used for this blog to your `_include` folder
+- Include comments.html into your `_layouts/post.html` or `_layouts/defaut.html` file (*delete* the space between `{` and `%`):
+
+```
+  { % include comments.html %}
+```
+
 
 ## Markdown tutorial
 See the Markdown [cheatsheet](https://github.com/adam-p/markdown-here/wiki/Markdown-Cheatsheet) for a complete list. In addition here are other formatting techniques and the more common techniques that I use.
@@ -242,7 +256,7 @@ Inline variables `a` and `b` can be used in equations \\( h\_t = \tanh ( a\_{t} 
 
 <pre>
 ```bash
-$ cd myblog # simple Bash command
+cd myblog # simple Bash command
 ```
 
 ```python
@@ -267,7 +281,7 @@ a = 4 -- no language indicated so no synthax highlight here
 </pre>
 
 ```bash
-$ cd myblog # simple Bash command
+cd myblog # simple Bash command
 ```
 
 ```python
@@ -293,5 +307,6 @@ a = 4 -- no language indicated so no synthax highlight here
 ## Further reading
 - [Steps](https://pages.github.com/) to create a blog on GitHub
 - [Jekyll](https://jekyllrb.com/)
+- [Disqus](https://disqus.com/)
 - Karpathy's [switching from Wordpress to Jekyll](http://karpathy.github.io/2014/07/01/switching-to-jekyll/)
 - Git tutorials: [Atlassian](https://www.atlassian.com/git/tutorials/setting-up-a-repository), [Dudler](http://rogerdudler.github.io/git-guide/), [Udacity](https://www.udacity.com/course/how-to-use-git-and-github--ud775)
