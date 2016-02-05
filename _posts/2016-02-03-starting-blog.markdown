@@ -43,7 +43,7 @@ jekyll serve
 - Browse to [http://localhost:4000](http://localhost:4000) to view blog locally
 - Create posts like this one under `myblog/_post` named `yyyy-mm-dd-name-of-file.markdown`
 
-User adds blog entries in the `_post` folder and adds data or figures to a `data` or `figures` folders created by user, and Jekyll builds the `_site` content. Never edit the `_site` folder directly. More information at [Jekyll](http://jekyllrb.com/docs/structure/).
+User adds blog entries in the `_post` folder and adds data or figures to a `data` or `figures` folder created by user, and Jekyll builds the `_site` content. Never edit the `_site` folder directly. More information at [Jekyll](http://jekyllrb.com/docs/structure/).
 
 ## Post to GitHub
 Navigate to your <code>*username*.github.io</code> folder. It's a good idea to create a `.gitignore` file and ignore the `_site` directory and temporary files (e.g., `.swp`, `*~`, etc). The `_site` directory is build by Jekyll and used to run the blog locally; GitHub does not use it.
@@ -54,7 +54,7 @@ echo "_post/*swp" >> .gitignore
 echo "_post/*~" >> .gitignore
 ~~~ 
 
-Git creates a local repository. Files can be *added* and *committed* to the local repository multiple times without affecting the master respository, i.e., the GitHub blog. To modify the actual blog, those committed files must be *pushed* to the master repository.
+Git creates a local repository. Files can be *added* and *committed* to the local repository multiple times without affecting the master respository, i.e., the GitHub blog. To modify the actual blog, the local repository is *pushed* to the master repository.
 
 First time push...
 
@@ -66,9 +66,9 @@ git push -u origin master
 
 Second+ time push...
 
-- add the modified files
+- add the modified or new files
 - commit the changes to the local repository
-- push committed changes to the master repository
+- push local repository to the master repository
 
 
 ~~~ bash
@@ -79,7 +79,7 @@ git push origin master
 ~~~ 
 Note that every modified file (including those already in the local repository) needs to be added prior to committing (this is a different use of `add` than in SVN; in SVN only new files into the repo need are added).
 
-An example from [stackoverflow](http://stackoverflow.com/questions/572549/difference-between-git-add-a-and-git-add) showing the various ways to add files
+For the curious, [here](http://stackoverflow.com/questions/572549/difference-between-git-add-a-and-git-add) is an example showing the various ways to add files
 
 ~~~ bash
 git init
@@ -128,7 +128,7 @@ Summary using `add`:
 
 
 ## Improving layout (optional)
-To add a Table of Contents (more information [here](http://www.seanbuscay.com/blog/jekyll-toc-markdown/)), add the following snippet at top of the file under the header
+To add a table of contents (more information [here](http://www.seanbuscay.com/blog/jekyll-toc-markdown/)), add the following snippet at top of the file under the header
 
 ~~~ bash
 *TOC
