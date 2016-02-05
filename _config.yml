@@ -10,5 +10,6 @@ github_username:  rodriguezandres
 linkedin_username: andres-rodriguez-3333212
 
 # Build settings
-markdown: redcarpet
+markdown: kramdown
+#markdown: redcarpet
 permalink: pretty
