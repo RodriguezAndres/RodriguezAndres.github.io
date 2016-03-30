@@ -2,7 +2,7 @@
 layout: post
 comments: true
 title:  "Steps to start a basic GitHub blog using Jekyll"
-date:   2016-02-03 23:00:00
+date:   2016-03-30 01:00:00
 mathjax: true
 ---
 

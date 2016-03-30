@@ -5,3 +5,6 @@ _site
 *swp
 _post/*swp
 _post/*~
+_site
+_post/*swp
+_post/*~
