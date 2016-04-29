@@ -10,7 +10,7 @@ mathjax: true
 {:toc}
 
 ## Installation
-Make sure you install the latest version of ruby that is compatible with your OS. I run this
+Make sure the latest version of ruby that is compatible with your OS is installed. I run this
 on Ubuntu 14.04
 
 ~~~ bash
@@ -221,11 +221,11 @@ Separate lines trailed by two spaces are not concatinated in the blog, e.g.,
 
 ~~~ 
 **bold** or *italics* or **_both_** or <s>strikethrough</s>. 
-Note that ~~strikethrough~~ should work but it's not working for me
+Note that ~~strikethrough~~ should work but it's not always working for me
 ~~~ 
 
 **bold** or *italics* or **_both_** or <s>strikethrough</s>. 
-Note that ~~strikethrough~~ should work but it's not working for me
+Note that ~~strikethrough~~ should work but it's not always working for me
 
 ~~~ 
 > Indent and italicized text

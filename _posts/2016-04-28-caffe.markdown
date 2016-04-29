@@ -1,0 +1,483 @@
+---
+layout: post
+comments: true
+title:  "Training and deploying deep learning networks with Caffe"
+date:   2016-04-28 01:00:00
+mathjax: true
+---
+
+This is a blog post that my AFRL team and I wrote for AFRL Caffe newbies and was approved for public released: 88ABW-2015-5479
+
+"It is comparatively easy to make computers exhibit adult-level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a 1-year-old when it comes to perception and mobility." ~Hans Moravec
+
+* TOC
+{:toc}
+
+## Summary
+[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)).
+
+## Installation
+On Ubuntu 14.04. Get dependencies:
+
+~~~ bash
+sudo apt-get update
+sudo apt-get install -y git build-essential
+sudo apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev 
+sudo apt-get install -y libopencv-dev libhdf5-serial-dev protobuf-compiler
+sudo apt-get install -y --no-install-recommends libboost-all-dev
+sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
+sudo apt-get install -y libatlas-base-dev # not needed if installing MKL or OpenBLAS
+~~~
+
+Install MKL for optimal Intel CPU performance (recommended)
+
+~~~ bash
+# download and install MKL (https://software.intel.com/en-us/articles/free_mkl)
+# register for a free community license and follow the instructions. Then
+echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
+# alternatively 'source <mkl_path>/mkl/bin/mklvars.sh intel64' if file above doesn't exist
+~~~
+
+The next set of instructions are only needed if using GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability <= 2.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints. If using AWS, it is easier to start with an image that already has the nvidia drivers or follow [these](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) instructions replacing those steps with the most current cuda version.
+
+~~~ bash
+CUDA_VER=7.5
+VER_UPDATE=18
+
+# This first set of commands can be ignored if using a
+# server with Nvidia drivers and CUDA already installed
+CUDAFILE=cuda_$CUDA_VER\.$VER_UPDATE\_linux.run
+wget http://developer.download.nvidia.com/compute/cuda/$CUDA_VER/Prod/local_installers/$CUDAFILE
+chmod +x $CUDAFILE
+mkdir nvidia_installers
+./$CUDAFILE -extract=`pwd`/nvidia_installers
+cd nvidia_installers
+NVDIA_INSTALLER=$(ls *NVIDIA*.run)
+CUDA_INSTALLER=$(ls cuda*rel*.run)
+CUDA_SAMPLES=$(ls cuda*samples*.run)
+sudo ./NVIDIA_INSTALLER # install nvidia drivers
+sudo ./CUDA_INSTALLER # install CUDA
+sudo ./CUDA_SAMPLES # install samples
+
+# (Don't ignore these steps) Add CUDA files and libs to path
+echo 'export PATH=/usr/local/cuda-'$CUDA_VER'/bin:$PATH' >> ~/.bashrc
+echo 'export LD_LIBRARY_PATH=/usr/local/cuda-'$CUDA_VER'/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
+
+# The rest of these lines are OPTIONAL
+rm $CUDAFILE 
+cd ~/cuda/1_Utilities/deviceQuery
+make
+./deviceQuery # queries the GPU
+nvidia-smi # returns GPU information
+~~~
+
+Downloading and installing Caffe
+
+~~~ bash
+cd ~
+source .bashrc
+# in addition to the functionalities and GPU performance found in BVLC caffe,
+# intelcaffe provides optimized CPU functionality and multinode scaling;
+# therefore, the intelcaffe branch is recommended (whether intelcaffe or 
+# BVLC caffe is used, the same steps and guidelines in this blog pply for both)
+# (Disclosure: I recently joined Intel where I learned about this Intel Caffe branch
+# and therefore I'm adding it to the blog)
+# For BVLC caffe use:
+# git clone https://github.com/BVLC/caffe.git
+# For intelcaffe use:
+git clone https://github.com/intelcaffe/caffe.git 
+cd caffe
+echo "export CAFFE_ROOT=`pwd`" >> ~./bashrc
+cp Makefile.config.example Makefile.config
+
+# Open Makefile.config and modify it (see comments in the Makefile), e.g.,
+# To run efficiently on GPU, uncommend
+# # USE_CUDNN := 1
+# To run on CPU only and to avoid installing CUDA installers, uncomment
+# # CPU_ONLY := 1
+# To use MKL replace atlas with mkl as follows
+# BLAS := mkl
+# BLAS_DIR := /opt/intel/mkl/include
+# BLAS_LIB := /opt/intel/mkl/lib/intel64
+
+# Make
+NUM_CORES=$(grep 'core id' /proc/cpuinfo | sort -u | wc -l)
+make -j $NUM_CORES # uses all the cores in make
+
+# The steps below are OPTIONAL to test caffe (recommended 1st time only)
+make test -j $NUM_CORES
+make runtest #"YOU HAVE <some number> DISABLED TESTS" output is OK
+
+# The steps below are OPTIONAL if a python interface is desired
+sudo apt-get -y install gfortran python-dev python-pip
+cd ~/caffe/python
+for req in $(cat requirements.txt); do sudo pip install $req; done
+sudo pip install scikit-image #depends on other packages
+sudo ln -s /usr/include/python2.7/ /usr/local/include/python2.7
+sudo ln -s /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/ \
+  /usr/local/include/python2.7/numpy
+echo 'sudo ln /dev/null /dev/raw1394' >> ~/.bashrc
+make pycaffe -j NUM_CORES
+export PYTHONPATH=$HOME/caffe/python
+echo 'export PYTHONPATH=$HOME/caffe/python' >> ~/.bashrc
+
+# The step below is OPTIONAL
+# it disables cam hardware OpenCV driver; alternatively, the user can skip this
+# and ignore the libdc1394 error that would occassionally appeared
+echo 'export sudo ln /dev/null /dev/raw1394' >> ~/.bashrc
+~~~
+
+## Dataset preparation
+Training and validation in Caffe is performed with the data stored in a set of Lightning Memory-Mapped Databases ([lmdb](http://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database)). The training/validation can be performed on data that's in common image formats or HDF5, however incurring a loss of efficiency.
+
+In order to use Caffe's tools to convert datasets to lmdbs the following is required:
+- A folder with the images
+- A text file with the image file names and corresponding labels, e.g., "train.txt" looks like
+- The output folders, e.g., mydataset_train_lmdb, must be non-existent
+
+~~~ bash
+img3423.jpg 2
+img3424.jpg 13
+img3425.jpg 8
+...
+~~~
+
+For example, the [create_label_file.py](link) FIX script creates a training and validation text file for the [Kaggle's Dog vs Cats](https://www.kaggle.com/c/dogs-vs-cats/data) competition.
+
+Note that in testing we assume that the labels are missing. If labels are available these same steps can be applied to prepare an lmdb test dataset.
+
+<h4>Preparing data with 3 channels (e.g., RGB images)</h4>
+The example below (based on [this](http://caffe.berkeleyvision.org/gathered/examples/imagenet.html)) produces a training and a validation lmdb, and therefore requires two text files, train.txt and val.txt. It runs from the `$CAFFE_ROOT` directory. Note that in this example it assumes the training and validation images are in the same folder.
+
+~~~ bash
+#!/usr/bin/env sh
+# Create the lmdb inputs
+TRAIN_DATA_ROOT=/home/ubuntu/data/train # folder containing the training and validation images
+TEXT=/home/ubuntu/data # folder containing the text files 
+OUTPUT=/home/ubuntu/data # folder for the lmdb datasets
+TOOLS=build/tools
+
+# Set RESIZE=true to resize the images to 256x256
+RESIZE=false
+if $RESIZE; then
+  RESIZE_HEIGHT=256
+  RESIZE_WIDTH=256
+else
+  RESIZE_HEIGHT=0
+  RESIZE_WIDTH=0
+fi
+
+echo "Creating train lmdb..."
+
+GLOG_logtostderr=1 $TOOLS/convert_imageset \
+    --resize_height=$RESIZE_HEIGHT \
+    --resize_width=$RESIZE_WIDTH \
+    --shuffle \
+    $TRAIN_DATA_ROOT/ \
+    $DATA/train.txt \
+    $OUTPUT/mydataset_train_lmdb
+
+echo "Creating val lmdb..."
+
+GLOG_logtostderr=1 $TOOLS/convert_imageset \
+    --resize_height=$RESIZE_HEIGHT \
+    --resize_width=$RESIZE_WIDTH \
+    --shuffle \
+    $TRAIN_DATA_ROOT/ \
+    $DATA/val.txt \
+    $OUTPUT/mydataset_val_lmdb
+
+echo "Done."
+~~~
+
+Computing the mean image in lmdb dataset:
+
+~~~ bash
+#!/usr/bin/env sh
+# Compute the mean image in lmdb dataset
+OUTPUT=/home/ubuntu/data # folder for the lmdb datasets and output for mean image
+TOOLS=build/tools
+
+$TOOLS/compute_image_mean $OUTPUT/mydataset_train_lmdb \
+  $OUTPUT/train_mean.binaryproto
+
+$TOOLS/compute_image_mean $OUTPUT/mydataset_val_lmdb \
+  $OUTPUT/val_mean.binaryproto
+
+echo "Done."
+~~~
+
+Viewing the mean image
+
+~~~ python
+import caffe
+import numpy as np
+import matplotlib.pyplot as plt
+import matplotlib.cm as cm
+%matplotlib inline
+
+blob = caffe.proto.caffe_pb2.BlobProto()
+data = open('/home/ubuntu/data/train_mean.binaryproto','rb').read()
+blob.ParseFromString(data)
+arr = np.array(caffe.io.blobproto_to_array(blob))[0,:,:,:].mean(0)
+plt.imshow(arr, cmap=cm.Greys_r)
+plt.show()
+~~~
+
+<h4>Preparing data with various channels</h4>
+Gray scale images (1-channel), RADAR images (2-channels), videos (4 channels), image+depth (4 channels), vibrometry (1 channel), and spectrograms (1-channel) required a wrapper in order to set the lmdb dataset (see [this blog script](https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045) as a guide).
+
+## Scoring
+Scoring is also known as testing or inference, depending on the community.
+
+## Training
+Training requires:
+
+- train_val.prototxt: defines the network architecture, initialization parameters, and local learning rates
+- solver.prototxt: defines optimization/training parameters and serves as the actual file that's called to train a deep network
+- (deploy.prototxt: actually this is used only in testing; is similar to train_val.prototxt but without the local learning rates, initialization values, and data layer)
+
+A description of what each layer does can be found [here](http://caffe.berkeleyvision.org/tutorial/layers.html). Initialization parameters are extremely important; they are set [here](https://github.com/BVLC/caffe/blob/master/include/caffe/filler.hpp here); some [tips](http://andyljones.tumblr.com/post/110998971763/an-explanation-of-xavier-initialization) worth mentioning:
+
+- weight_filter initialization (for ReLU neurons, MSRAFiller is usually better than xavier which is usually better than gaussian; note for MSRAFiller and xavier, there is no need to manually specify std)
+  - gaussian: samples weights from N(0,std)
+  - xavier: samples weights from U(-a,a), where a=sqrt(3/fan_in), where fan_in are the number of incoming neurons 
+  - MSRAFiller: samples weights from N(0,a), where a=sqrt(2/fan_in)
+- base_lr: initial learning rate ( default:.01, change to a smaller number if getting NAN loss in training )
+- lr_mult for the bias is usually set to 2x the lr_mult for the non-bias weights
+
+LeNet example: [lenet_train_test.prototxt](https://github.com/BVLC/caffe/blob/master/examples/mnist/lenet_train_test.prototxt), [deploy.prototxt](https://github.com/BVLC/caffe/blob/master/examples/mnist/lenet.prototxt), and solver.prototxt described below (comments about what each variable means are included):
+
+solver.prototxt
+
+~~~ bash
+# The train/validation net protocol buffer definition, i.e., the training architecture
+net: "examples/mnist/lenet_train_test.prototxt"
+
+# Note: 1 iteration = 1 forward pass over all the images in one batch
+
+# Carry out a validation test every 500 training iterations.
+test_interval: 500 
+
+# test_iter specifies how many forward passes the validation test should carry out
+#  a good number is num_val_imgs / batch_size (see batch_size in Data layer in phase TEST in train_test.prototxt)
+test_iter: 100 
+
+# The base learning rate, momentum and the weight decay of the network.
+base_lr: 0.01
+momentum: 0.9 
+weight_decay: 0.0005
+
+# We want to initially move fast towards the local minimum and as we approach it, we want to move slower
+# To this end, there are various learning rates policies available:
+#  fixed: always return base_lr.
+#  step: return base_lr * gamma ^ (floor(iter / step))
+#  exp: return base_lr * gamma ^ iter
+#  inv: return base_lr * (1 + gamma * iter) ^ (- power)
+#  multistep: similar to step but it allows non uniform steps defined by stepvalue
+#  poly: the effective learning rate follows a polynomial decay, to be zero by the max_iter: return base_lr (1 - iter/max_iter) ^ (power)
+#  sigmoid: the effective learning rate follows a sigmod decay: return base_lr * ( 1/(1 + exp(-gamma * (iter - stepsize))))
+lr_policy: "step"
+gamma: 0.1 
+stepsize: 10000 # Drop the learning rate in steps by a factor of gamma every stepsize iterations
+
+# Display every 100 iterations
+display: 100 
+
+# The maximum number of iterations
+max_iter: 10000
+
+# snapshot intermediate results, i.e., every 5000 iterations it saves a snapshot of the weights
+snapshot: 5000
+snapshot_prefix: "examples/mnist/lenet_multistep"
+
+# solver mode: CPU or GPU
+solver_mode: CPU
+~~~
+
+Training speed. The time command measure the forward and backward propogation time, but does not include the time for the optimization algorithm to iterate and update the weights.
+
+~~~ bash
+# Computes 50 iterations and returns forward, backward, and total time
+# for each iteration and the average
+$CAFFE_ROOT/build/tools/caffe time --model=train_val.prototxt -iterations 50
+~~~
+
+Train the network:
+
+~~~ bash
+# The name of the output file (aka the trained weights) is in solver.prototxt
+$CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt
+# Alternatively, if using GPU, the user could (although not required)
+# specify which GPU to use (GPU 0 in this case)
+# $CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt -gpu 0
+~~~
+
+Training will produce two files:
+- somename_iter_NUMITER.caffemodel: weights of the architecture to be used in testing
+- somename_iter_NUMITER.solverstate: used if training dies (e.g., power outage) to resume training from current iteration
+
+To train the network and plot the validation accuracy or loss vs iterations:
+
+~~~ bash
+#CHART_TYPE=[0-7]
+#  0: Test accuracy  vs. Iters
+#  1: Test accuracy  vs. Seconds
+#  2: Test loss  vs. Iters
+#  3: Test loss  vs. Seconds
+#  4: Train learning rate  vs. Iters
+#  5: Train learning rate  vs. Seconds
+#  6: Train loss  vs. Iters
+#  7: Train loss  vs. Seconds
+CHART_TYPE=0
+$CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt &> logfile.log
+python $CAFFE_ROOT/tools/extra/plot_training_log.py.example $CHART_TYPE name_of_plot.png logfile.log
+~~~
+
+Dropout and Dropconnect:
+-Dropconnect does not exist in the main Caffe branch as the benefits are marginal
+-Dropout can be implemented in a fully connected layer as
+
+~~~ bash
+layer {
+  name: "fc6"
+  type: "InnerProduct"
+  bottom: "pool5"
+  top: "fc6"
+  param {
+    lr_mult: 1
+    decay_mult: 1
+  }
+  param {
+    lr_mult: 2
+    decay_mult: 0
+  }
+  inner_product_param {
+    num_output: 4096
+    weight_filler {
+      type: "gaussian"
+      std: 0.005
+    }   
+    bias_filler {
+      type: "constant"
+      value: 1
+    }   
+  }
+}
+layer {
+  name: "relu6"
+  type: "ReLU"
+  bottom: "fc6"
+  top: "fc6"
+}
+layer {
+  name: "drop6"
+  type: "Dropout"
+  bottom: "fc6"
+  top: "fc6"
+  dropout_param {
+    dropout_ratio: 0.5 
+  }
+}
+~~~
+
+## Fine-tuning
+Recyle the layer definition prototxt file and made the following two changes:
+
+1) Change the data layer to include the new data:
+
+~~~ bash
+layer {
+  name: "mnist"
+  type: "Data"
+  top: "data"
+  top: "label"
+  transform_param {
+    scale: 0.00390625
+  }
+  data_param {
+    source: "newdata_lmdb" #CHANGED THIS LINE TO THE NEW DATASET WITH ONLY TWO CLASSES
+    batch_size: 64
+    backend: LMDB
+  }
+}
+~~~
+
+2) Change the last layer, e.g., "fc2-ft" (note: in testing, make this same change to the deploy.prototxt file)
+
+~~~ bash
+layer {
+  name: "ip2-ft" #CHANGED THIS LINE
+  type: "InnerProduct"
+  bottom: "ip1"
+  top: "ip2-ft" #CHANGED THIS LINE
+  param {
+    lr_mult: 1
+  }
+  param {
+    lr_mult: 2
+  }
+  inner_product_param {
+    num_output: 2 #CHANGED THIS LINE TO THE NUMBER OF CLASSES IN NEW DATASET
+    bias_filler {
+      type: "constant"
+    }
+  }
+}
+~~~
+
+Invoke caffe (train or, more precisely, fine-tune):
+
+~~~ bash
+#From the command line on $CAFFE_ROOT
+./build/tools/caffe train -solver name_of_solver.prototxt -weights already_trained_binary_model.caffemodel
+~~~
+
+<h4>Fine-tuning tricks</h4>
+- Learn the last layer first (earlier layer weights won't change very much in fine-tuning)
+  - Caffe layers have local learning rates: lr_mult
+  - Freeze all but the last layer for fast optimization, i.e., lr_mult=0
+  - Stop if good enough or keep fine-tuning other layers
+  - This will speed up training times
+- Alternatively you could leave all learning rates as they are and increase the last two layers
+  - Last layer by 10x
+  - Second to last by 5x
+- Reduce the learning rate
+  - Drop the initial learning rate (in the solver_file.prototxt) by 10x or 100x
+
+<h4>What happens under the hood</h4>
+- Creates a new network
+- Copy the previous weights to initialized network weights
+- Solves the usual way
+(see [example](http://caffe.berkeleyvision.org/gathered/examples/finetune_flickr_style.html))
+
+## Filter-visualization
+
+## Experiments
+
+## AWS
+<h4>Mounting a volume to an EC2 instance</h4>
+Create a volume (or select existing volume) and attach it to EC2 instance. New volumes are raw block devices, and user needs to create a file system on them before user can mount and use them.
+
+~~~ bash
+### Once the volume is attached via the EC2 console, it can be mounted as follow ###
+lsblk # Find the name of the device attached volume (e.g., xvdf means device_name is /dev/xvdf)
+sudo file -s <device_name> # check that the volume is empty: only returns "device_name: data" 
+sudo mkfs -t ext4 <device_name> # WARNING: only do this step if volume is empty (it will delete existing data)
+sudo mkdir work_folder_name # mame the folder (e.g., data, work, etc)
+sudo mount <device_name> work_folder_name
+sudo chown -R ubuntu:ubuntu work_folder_name # change ownership from root to user ubuntu and group ubuntu
+### The volume can be unmounted as follows ###
+sudo umount work_folder_name # unmount device
+~~~
+
+<h4>Launching multinodes</h4>
+TO DO
+
+<h4>Additional AWS Help</h4>
+[EC2 User Guide](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html)
+[EC2 pricing](http://aws.amazon.com/ec2/pricing/)
+[EBS pricing](http://aws.amazon.com/ebs/pricing/)
+[S3 pricing](http://aws.amazon.com/s3/pricing/)
+
+## Further reading
