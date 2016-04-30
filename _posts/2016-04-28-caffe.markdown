@@ -6,15 +6,23 @@ date:   2016-04-28 01:00:00
 mathjax: true
 ---
 
-This is a blog post that my AFRL team and I wrote for AFRL Caffe newbies and was approved for public released: 88ABW-2015-5479
-
 "It is comparatively easy to make computers exhibit adult-level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a 1-year-old when it comes to perception and mobility." ~Hans Moravec
+
+This is a blog post that my AFRL team and I wrote for AFRL Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position of others or of my employeer (current or previous).
 
 * TOC
 {:toc}
 
 ## Summary
-[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)).
+[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term neural because it gives the impression that it resembles an actual neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), CPU efficient [multinode training and scoring](https://github.com/intelcaffe/caffe/) for some architectures, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [spark](https://github.com/yahoo/CaffeOnSpark) compatible.
+
+Vocabulary I use:
+
+- weights (others call them kernels, feature extractors, filters, and paramters) 
+- blob - a 4 dimensional data structure--a 4D tensor--that contains data, gradients, or weights
+- units (others call them neurons) - performs a non-linear transformation on a data blob
+- feature maps (others call them channels)
+- testing (others call it inference, classification, scoring, or deployment)
 
 ## Installation
 On Ubuntu 14.04. Get dependencies:
@@ -29,7 +37,7 @@ sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
 sudo apt-get install -y libatlas-base-dev # not needed if installing MKL or OpenBLAS
 ~~~
 
-Install MKL for optimal Intel CPU performance (recommended)
+Install "MKL for better CPU performance" ([source](http://caffe.berkeleyvision.org/install_apt.html) 4/28/2016) (recommended)
 
 ~~~ bash
 # download and install MKL (https://software.intel.com/en-us/articles/free_mkl)
@@ -38,7 +46,7 @@ echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
 # alternatively 'source <mkl_path>/mkl/bin/mklvars.sh intel64' if file above doesn't exist
 ~~~
 
-The next set of instructions are only needed if using GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability <= 2.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints. If using AWS, it is easier to start with an image that already has the nvidia drivers or follow [these](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) instructions replacing those steps with the most current cuda version.
+The next set of instructions are only needed if using GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability <= 2.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
 
 ~~~ bash
 CUDA_VER=7.5
@@ -87,7 +95,7 @@ source .bashrc
 # For intelcaffe use:
 git clone https://github.com/intelcaffe/caffe.git 
 cd caffe
-echo "export CAFFE_ROOT=`pwd`" >> ~./bashrc
+echo "export CAFFEHOME=`pwd`" >> ~./bashrc
 cp Makefile.config.example Makefile.config
 
 # Open Makefile.config and modify it (see comments in the Makefile), e.g.,
@@ -104,11 +112,7 @@ cp Makefile.config.example Makefile.config
 NUM_CORES=$(grep 'core id' /proc/cpuinfo | sort -u | wc -l)
 make -j $NUM_CORES # uses all the cores in make
 
-# The steps below are OPTIONAL to test caffe (recommended 1st time only)
-make test -j $NUM_CORES
-make runtest #"YOU HAVE <some number> DISABLED TESTS" output is OK
-
-# The steps below are OPTIONAL if a python interface is desired
+# The steps below are OPTIONAL but highly recommended to use a python interface
 sudo apt-get -y install gfortran python-dev python-pip
 cd ~/caffe/python
 for req in $(cat requirements.txt); do sudo pip install $req; done
@@ -118,8 +122,11 @@ sudo ln -s /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/ \
   /usr/local/include/python2.7/numpy
 echo 'sudo ln /dev/null /dev/raw1394' >> ~/.bashrc
 make pycaffe -j NUM_CORES
-export PYTHONPATH=$HOME/caffe/python
-echo 'export PYTHONPATH=$HOME/caffe/python' >> ~/.bashrc
+echo 'export PYTHONPATH=$CAFFEHOME/python' >> ~/.bashrc
+
+# The steps below are OPTIONAL to test caffe (recommended 1st time only)
+make test -j $NUM_CORES
+make runtest #"YOU HAVE <some number> DISABLED TESTS" output is OK
 
 # The step below is OPTIONAL
 # it disables cam hardware OpenCV driver; alternatively, the user can skip this
@@ -147,7 +154,7 @@ For example, the [create_label_file.py](link) FIX script creates a training and 
 Note that in testing we assume that the labels are missing. If labels are available these same steps can be applied to prepare an lmdb test dataset.
 
 <h4>Preparing data with 3 channels (e.g., RGB images)</h4>
-The example below (based on [this](http://caffe.berkeleyvision.org/gathered/examples/imagenet.html)) produces a training and a validation lmdb, and therefore requires two text files, train.txt and val.txt. It runs from the `$CAFFE_ROOT` directory. Note that in this example it assumes the training and validation images are in the same folder.
+The example below (based on [this](http://caffe.berkeleyvision.org/gathered/examples/imagenet.html)) produces a training and a validation lmdb, and therefore requires two text files, train.txt and val.txt. It runs from the `$CAFFEHOME` directory. Note that in this example it assumes the training and validation images are in the same folder.
 
 ~~~ bash
 #!/usr/bin/env sh
@@ -227,9 +234,6 @@ plt.show()
 <h4>Preparing data with various channels</h4>
 Gray scale images (1-channel), RADAR images (2-channels), videos (4 channels), image+depth (4 channels), vibrometry (1 channel), and spectrograms (1-channel) required a wrapper in order to set the lmdb dataset (see [this blog script](https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045) as a guide).
 
-## Scoring
-Scoring is also known as testing or inference, depending on the community.
-
 ## Training
 Training requires:
 
@@ -300,17 +304,14 @@ Training speed. The time command measure the forward and backward propogation ti
 ~~~ bash
 # Computes 50 iterations and returns forward, backward, and total time
 # for each iteration and the average
-$CAFFE_ROOT/build/tools/caffe time --model=train_val.prototxt -iterations 50
+$CAFFEHOME/build/tools/caffe time --model=train_val.prototxt -iterations 50
 ~~~
 
 Train the network:
 
 ~~~ bash
 # The name of the output file (aka the trained weights) is in solver.prototxt
-$CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt
-# Alternatively, if using GPU, the user could (although not required)
-# specify which GPU to use (GPU 0 in this case)
-# $CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt -gpu 0
+$CAFFEHOME/build/tools/caffe train -solver solver.prototxt
 ~~~
 
 Training will produce two files:
@@ -330,8 +331,8 @@ To train the network and plot the validation accuracy or loss vs iterations:
 #  6: Train loss  vs. Iters
 #  7: Train loss  vs. Seconds
 CHART_TYPE=0
-$CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt &> logfile.log
-python $CAFFE_ROOT/tools/extra/plot_training_log.py.example $CHART_TYPE name_of_plot.png logfile.log
+$CAFFEHOME/build/tools/caffe train -solver solver.prototxt &> logfile.log
+python $CAFFEHOME/tools/extra/plot_training_log.py.example $CHART_TYPE name_of_plot.png logfile.log
 ~~~
 
 Dropout and Dropconnect:
@@ -429,7 +430,7 @@ layer {
 Invoke caffe (train or, more precisely, fine-tune):
 
 ~~~ bash
-#From the command line on $CAFFE_ROOT
+#From the command line on $CAFFEHOME
 ./build/tools/caffe train -solver name_of_solver.prototxt -weights already_trained_binary_model.caffemodel
 ~~~
 
@@ -451,9 +452,352 @@ Invoke caffe (train or, more precisely, fine-tune):
 - Solves the usual way
 (see [example](http://caffe.berkeleyvision.org/gathered/examples/finetune_flickr_style.html))
 
-## Filter-visualization
+## Testing
+To classify an image (or signal) or set of images you need:
+
+- Image(s)
+- Network architecture
+- Network weights
+
+The modules used for testing are Classifier, load_image and predict:
+
+- net = caffe.Classifier
+  - INPUTS: architecture (model_file) and weights (pretrained_file)
+  - Optional: image_dims; mean=None (subtraction switched on by giving a mean array--usually mean of the training images); input_scale=None; raw_scale=None (multiplies the feature scale from the input [0,1] to [0,raw_scale]; channel_swap=None
+  - RETURNS: network
+
+- caffe.io.load_image
+  - INPUT: image
+  - RETURNS: image formatted for Caffe
+
+- prediction = net.predict
+  - INPUT: a list of H \\( \times \\) W \\( \times \\) K arrays, i.e., a list of images
+  - Optional: oversample=True (crops 10 images--center, corners, mirrors; if false only crops center)
+  - RETURNS: Classification probabilities of inputs as a list of list
+
+Example script to test network (type: "python [classify_example.py](link) FIX" to run):
+- import the required modules
+- ensure that the pretrained model has been downloaded
+- specify CPU/GPU mode,
+- load pre-trained deep net and specify any pre-processing on the input
+
+~~~ python
+import numpy as np
+
+# Make sure that caffe is on the python path:
+import sys 
+CAFFEHOME = '/home/ubuntu/caffe/' # CHANGE THIS LINE TO YOUR Caffe PATH
+sys.path.insert(0, CAFFEHOME + 'python')
+
+import caffe
+
+# Set the right path to your model definition file, pretrained model weights,
+# and the image you would like to classify.
+MODEL_FILE = CAFFEHOME + 'models/bvlc_reference_caffenet/deploy.prototxt'
+PRETRAINED = CAFFEHOME + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel' #Weights to be used w/MODEL_FILE
+IMAGE_FILE1 = CAFFEHOME + 'examples/images/cat.jpg'
+IMAGE_FILE2 = CAFFEHOME + 'examples/images/fish-bike.jpg'
+
+# Download weight file if not found
+import os
+if not os.path.isfile(PRETRAINED):
+    print("Downloading pre-trained CaffeNet model...")
+    os.system('../scripts/download_model_binary.py ../models/bvlc_reference_caffenet')
+
+# Use GPU or CPU
+caffe.set_mode_cpu()
+#caffe.set_mode_gpu()
+
+# Load network
+# Note arguments to preprocess input
+#  mean subtraction switched on by giving a mean array
+#  input channel swapping takes care of mapping RGB into the reference ImageNet model's BGR order
+#  raw scaling multiplies the feature scale from the input [0,1] to the ImageNet model's [0,255]
+net = caffe.Classifier(MODEL_FILE, PRETRAINED,
+                       mean=np.load(CAFFEHOME + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1),
+                       channel_swap=(2,1,0),
+                       raw_scale=255,
+                       image_dims=(256, 256))
+# Alternatively, the above could have been written as:
+#net = caffe.Classifier(MODEL_FILE, PRETRAINED)
+#net.transformer.set_mean('data', np.load(CAFFEHOME + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1))
+#net.transformer.set_raw_scale('data', 255)  # reference model operates on [0,255] range instead of [0,1]
+#net.transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
+
+input_image1 = caffe.io.load_image(IMAGE_FILE1)
+input_image2 = caffe.io.load_image(IMAGE_FILE2)
+input_images = [input_image1, input_image2]
+
+# Classify image
+prediction = net.predict(input_images)  # predict takes any number of images, and formats them for the Caffe net automatically
+print 'predicted classes:', prediction[0].argmax(), prediction[1].argmax()
+
+### The steps below are OPTIONAL ###
+# View input_image1
+plt.imshow(input_image1)
+
+# View the probabilities of all the classes for input_image1 as a bar chart
+plt.plot(prediction[0])
+
+# Time the full pipeline classification for 1 image w/oversampling
+timeit net.predict([input_image1])
+
+# Time the only forward pass classification for 1 image by resizing/oversampling before forward pass
+#   Resize the image to the standard (256, 256) and oversample net input sized crops.
+input_oversampled = caffe.io.oversample([caffe.io.resize_image(input_image1, net.image_dims)], net.crop_dims)
+#   'data' is the input blob name in the model definition, so we preprocess for that input.
+caffe_input = np.asarray([net.transformer.preprocess('data', in_) for in_ in input_oversampled])
+#  forward() takes keyword args for the input blobs with preprocessed input arrays.
+timeit net.forward(data=caffe_input)
+~~~
+
+If using a folder with many images, just replace input_images as follows (everything else stays the same)
+
+~~~ python
+IMAGE_FOLDER = '/path_to_folder_w_images/'
+import os
+images = os.listdir(IMAGES_FOLDER)
+input_images = [ caffe.io.load_image(IMAGES_FOLDER + im) for im in images ]
+~~~
+
+Note that the entire test set may not fit in memory, so in same architectures, it may be better to do the predictions in batches of (say) 100.
+
+
+## Feature extractor and visualization
+In a convolutional layer the weights from one layer to the next can be represented by a blob which is four-dimensional tensor: output_feature_maps \\( \times \\) height \\( \times \\) width \\( \times \\) input_feature_maps (feature_maps AKA channels). There are two options for using networks trained in Caffe as feature extractors: The first option (highly recommended) is to use the Python API, and the second option is to use the native C++ utility that ships with Caffe.
+
+<h4>Using the Python API</h4>
+
+~~~ python
+# Retrieve details of the network’s layers and shapes
+[(k, v.data.shape) for k, v in net.blobs.items()]
+
+# Retrieve parameters of the network’s layers
+[(k, v[0].data.shape) for k, v in net.params.items()]
+
+# Retrieve the features in the last fully connected layer prior to outputting class probabilities
+feat = net.blobs['fc7'].data[4]
+
+# Retrieve size/dimensions of the array
+feat.shape
+~~~
+
+Example
+
+~~~ python
+# Assume the network 'net' has been loaded and data formatted as in the example above
+
+# View a list of the network layer outputs and their dimensions
+[(k, v.data.shape) for k, v in net.blobs.items()]
+
+# VISUALIZE DATA DEFINITION 
+# take an array of shape (n, height, width) or (n, height, width, channels)
+# and visualize each (height, width) thing in a grid of size approx. sqrt(n) by sqrt(n)
+def vis_square(data, padsize=1, padval=0):
+    data -= data.min()
+    data /= data.max()
+    
+    # force the number of filters to be square
+    n = int(np.ceil(np.sqrt(data.shape[0])))
+    padding = ((0, n ** 2 - data.shape[0]), (0, padsize), (0, padsize)) + ((0, 0),) * (data.ndim - 3)
+    data = np.pad(data, padding, mode='constant', constant_values=(padval, padval))
+    
+    # tile the filters into an image
+    data = data.reshape((n, n) + data.shape[1:]).transpose((0, 2, 1, 3) + tuple(range(4, data.ndim + 1)))
+    data = data.reshape((n * data.shape[1], n * data.shape[3]) + data.shape[4:])
+    
+    plt.imshow(data)
+
+    # the parameters are a list of [weights, biases]
+
+# VISUALIZE THE WEIGHTS OF THE 1ST CONV LAYER
+plt.rcParams['figure.figsize'] = (25.0, 20.0)
+filters = net.params['conv1'][0].data
+vis_square(filters.transpose(0, 2, 3, 1))
+
+# VISUALIZE THE FEATURE MAPS AFTER 1ST CONV LAYER
+feat = net.blobs['conv1'].data[0,:96]
+vis_square(feat, padval=1)
+net.blobs['conv1'].data.shape
+
+# VISUALIZE THE FEATURE MAPS AFTER 2ND CONV LAYER
+feat = net.blobs['conv2'].data[0]
+vis_square(feat, padval=1)
+net.blobs['conv1'].data.shape
+
+# VISUALIZE THE FEATURE MAPS AFTER 2ND POOL LAYER
+feat = net.blobs['pool2'].data[0,:256] # change 256 to number of pool outputs
+vis_square(feat, padval=1)
+net.blobs['conv1'].data.shape
+
+# VISUALIZE THE NEURON ACTIVATIONS FOR THE 2ND FULLY-CONNECTED LAYER
+feat = net.blobs['ip2'].data[0]
+plt.plot(feat.flat)
+plt.legend()
+plt.show()
+~~~
+
+<h4>Using the C++ Utility</h4>
+Ensure that Caffe has been successfully installed and the model params downloaded
+
+~~~ bash
+# Download model params
+scripts/download_model_binary.py models/bvlc_reference_caffenet
+
+# Make a temporary folder
+mkdir examples/_temp
+
+# Generate a list of the files to process. We’re going to use the images that ship with caffe.
+find `pwd`/examples/images -type f -exec echo {} \; > examples/_temp/temp.txt
+
+# Add a 0 to the end of each line - input data structures expect labels after each image file name
+sed "s/$/ 0/" examples/_temp/temp.txt > examples/_temp/file_list.txt
+
+# Get the mean of trn set to subtract it from imgs
+./data/ilsvrc12/get_ilsvrc_aux.sh
+
+# Copy and modify the network definition to use it's datalayer to load and resize the images:
+cp examples/feature_extraction/imagenet_val.prototxt examples/_temp
+
+# Extract features
+./build/tools/extract_features.bin models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel \
+    examples/_temp/imagenet_val.prototxt fc7 examples/_temp/features 10 lmdb
+
+# Remove features
+rm -rf examples/_temp/features/
+~~~
+
+Above, the name of the feature blob that is extracted is ''fc7'', which represents the highest level feature of the reference model. Alternatively, other layers can be used as well, such as ''conv5'' or ''pool3''. The last parameter above is the number of data mini-batches. The features are stored to LevelDB `examples/_temp/features`, ready for access by some other code.
+
+Upon issuing the command, if the following error is received, "Check failed: status.ok() Failed to open leveldb examples/_temp/features", it's because the directory ''examples/_temp/features'' has been created the last time the command was issued. Remove directory and run again.
+
 
 ## Experiments
+<h4>Dogs vs Cats</h4>
+Get an account with [Kaggle](https://www.kaggle.com/) and download the [data](https://www.kaggle.com/c/dogs-vs-cats/data). Note that you cannot just do wget bc you have to login to Kaggle. Login to Kaggle, download data, and transfer it to your machine
+
+Unzip [dogvscat.zip](https://github.com/RodriguezAndres/Kaggle-dogs-vs-cats/blob/master/dogvscat.sh) and execute the `dogvscat.sh` script (contained in the zip file and shown below for convenience).
+
+~~~ bash
+#!/usr/bin/env sh
+CAFFEHOME=/home/ubuntu/caffe
+mkdir dogvscat
+DOG_VS_CAT_FOLDER=/home/ubuntu/dogvscat
+
+cd $DOG_VS_CAT_FOLDER
+## Download datasets (requires first a login)
+#https://www.kaggle.com/c/dogs-vs-cats/download/train.zip
+#https://www.kaggle.com/c/dogs-vs-cats/download/test1.zip
+
+# Unzip train and test data
+sudo apt-get -y install unzip
+unzip train.zip -d .
+unzip test1.zip -d .
+
+# Format data
+python create_label_file.py FIX # creates 2 text files with labels for training and validation
+./build_datasets.sh # build lmdbs
+
+# Download ImageNet pretrained weights (takes ~20 min)
+$CAFFEHOME/scripts/download_model_binary.py $CAFFEHOME/models/bvlc_reference_caffenet 
+
+# Fine-tune weights in the AlexNet architecture (takes ~100 min)
+$CAFFEHOME/build/tools/caffe train -solver $DOG_VS_CAT_FOLDER/dogvscat_solver.prototxt \
+    -weights $CAFFEHOME/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel 
+
+# Classify test dataset
+cd $DOGVSCAT_FOLDER
+python convert_binaryproto2npy.py
+python dogvscat_classify.py # Returns prediction.txt (takes ~30 min)
+
+# A better approach is to train five AlexNets w/init parameters from the same distribution,
+# fine-tune those five, and compute the average of the five networks
+~~~
+
+- I submitted my results to Kaggle and got a score of 0.97566 accuracy (which would have placed 15th out of 215 in the competition).
+
+<h4>PASCAL VOC Classification</h4>
+Unzip [voc2012.zip](https://github.com/RodriguezAndres/Pascal-VOC-2012/blob/master/voc2012.zip) and execute the `voc2012.sh` script (contained in the zip file and shown below for convenience). Type `sudo chmod 700 *.sh` to make sure the scripts can be executed. It trains and runs AlexNet.
+
+~~~ bash
+#!/usr/bin/env sh
+
+# Copy and unzip voc2012.zip (it contains this file) then run this file. But first
+#  change paths in: voc2012.sh; build_datasets.sh; solvers/*; nets/*; classify.py
+
+# As you run various files, you can ignore the following error if it shows up:
+#  libdc1394 error: Failed to initialize libdc1394
+
+# set Caffe root directory
+CAFFEHOME=$CAFFEHOME
+VOC=/home/ubuntu/voc2012
+
+chmod 700 *.sh
+
+# Download datasets or copy from /files/vol03/projects/Caffe/data/PASCAL_VOC/
+# Details: http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devkit
+if [ ! -f VOCtrainval_11-May-2012.tar ]; then
+  wget http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
+fi
+# VOCtraival_11-May-2012.tar contains the VOC folder with:
+#  JPGImages: all jpg images
+#  Annotations: objects and corresponding bounding box/pose/truncated/occluded per jpg
+#  ImageSets: breaks the images by the type of task they are used for
+#  SegmentationClass and SegmentationObject: segmented images (duplicate directories)
+tar -xvf VOCtrainval_11-May-2012.tar
+
+# Run python scripts to create labeled text files
+python create_labeled_txt_file.py
+ 
+# Execute shell script to create training and validation lmdbs
+# Note that LMDB directories w/the same name cannot exist prior to creating them
+./build_datasets.sh
+ 
+# Execute following command to download caffenet pre-trained weights (takes ~20 min)
+#  if weights exist already then the command is ignored
+$CAFFEHOME/scripts/download_model_binary.py $CAFFEHOME/models/bvlc_reference_caffenet
+ 
+# Fine-tune weights in the AlexNet architecture (takes ~60 min)
+# you can also chose one of six solvers: pascal_solver[1-6].prototxt
+$CAFFEHOME/build/tools/caffe train -solver $VOC/solvers/voc2012_solver.prototxt \
+  -weights $CAFFEHOME/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+
+# The lines below are not really needed; they served as examples on how to do some tasks
+
+# Test against voc2012_val_lmbd dataset (name of lmdb is the model under PHASE: test)
+#  -gpu 0: using the GPU 0 in the machine (numbered from 0 to numGPUs-1)
+#  -iterations: to use all val imgs use iter = numValImgs / batchSize
+ $CAFFEHOME/build/tools/caffe test -model $VOC/nets/voc2012_train_val_ft678.prototxt \
+   -weights $VOC/weights_iter_5000.caffemodel -iterations 116
+
+# Classify validation dataset: returns a file w/the labels of the val dataset
+#  but it doesn't report accuracy (that would require some adjusting of the code)
+python convert_binaryproto2npy.py
+mkdir results
+python cls_confidence.py
+python average_precision.py
+
+# Note to submit results to the VOC scoreboard, retrain NN using the trainval set
+# and test on the unlabeled test data provided by VOC
+
+# A better approach is to train five CNNs w/init parameters from the same distribution,
+# fine-tune those five, and compute the average of the five networks
+~~~
+
+'''Additional VOC information''' (in case the reader is interested in learning more about VOC):
+
+- PASCAL VOC [datasets](http://host.robots.ox.ac.uk/pascal/VOC/)
+- To compare methods or design choices
+  - use the entire VOC2007 data, where all annotations (including test annotations) are available
+  - report cross-validation results using VOC2012 "trainval" set alone (no test annotations are provided from 2008 to 2012)
+  - most common metric is [average precision (AP)](https://makarandtapaswi.wordpress.com/2012/07/02/intuition-behind-average-precision-and-map/): area under the precision/recall curve
+- VOC 2012 Data Summary
+  - In 2008, there was a new dataset and each year more data was added. Therefore it is common to see published results in VOC2007 and VOC2012 (or VOC2011--no additional data for the classification and detection task between 2011 and 2012)
+  - 20 classes
+  - Training: 5,717 images, 13,609 objects
+  - Validation: 5,823 images, 13,841 objects
+  - Testing: 10,991 images
+
 
 ## AWS
 <h4>Mounting a volume to an EC2 instance</h4>
@@ -462,6 +806,7 @@ Create a volume (or select existing volume) and attach it to EC2 instance. New v
 ~~~ bash
 ### Once the volume is attached via the EC2 console, it can be mounted as follow ###
 lsblk # Find the name of the device attached volume (e.g., xvdf means device_name is /dev/xvdf)
+
 sudo file -s <device_name> # check that the volume is empty: only returns "device_name: data" 
 sudo mkfs -t ext4 <device_name> # WARNING: only do this step if volume is empty (it will delete existing data)
 sudo mkdir work_folder_name # mame the folder (e.g., data, work, etc)
@@ -480,4 +825,33 @@ TO DO
 [EBS pricing](http://aws.amazon.com/ebs/pricing/)
 [S3 pricing](http://aws.amazon.com/s3/pricing/)
 
+## Current Caffe uses
+- [Demo](http://demo.caffe.berkeleyvision.org/): Pick an URL image or give it your own
+- Regions with Convolutional Neural Network Features (RCNN) finds many regions of interest and then applies Caffe to those regions
+  - Ross Girshick et al., "Rich feature hierarchies for accurate object detection and semantic segmentation". CVPR14
+    - [paper](http://arxiv.org/abs/1311.2524v4), [code](https://github.com/rbgirshick/rcnn), [R-CNN Caffe build instructions](https://github.com/rbgirshick/rcnn/blob/master/README.md)
+  - Ross Girshick, "Fast R-CNN". 2015
+    - [paper](http://arxiv.org/pdf/1504.08083v1), [code](https://github.com/rbgirshick/fast-rcnn/blob/master/README.md)
+ - Simultenous Detection and Segmentation (SDS)
+  - Each pixel has a label
+  - [paper](http://arxiv.org/abs/1411.4038) Jonathan Long, Evan Shelhamer, Trevor Darrell, "Fully Convolutional Networks for Semantic Segmentation", 2015
+  - Similar architectures for depth estimation and for denoising
+
+## Other Interesting Deep Learning Works
+- [Clarifai demo](http://clarifai.com/): Pick an URL image/video or give it your own
+- [places demo](http://places.csail.mit.edu/demo.html)
+- Input images and output captioning in natural language
+  - [paper](http://arxiv.org/abs/1411.4389) Donague, et al., "Long-term Recurrent Convolutional Networks for Visual Recognition and Description", 2015
+- CNNs designed for hyperspectral classification
+  -  ["Deep Convolutional Neural Networks for Hyperspectral Image Classification"](http://downloads.hindawi.com/journals/js/aip/258619.pdf)
+
 ## Further reading
+- [Caffe homepage](http://.caffe.berkeleyvision.org/)
+- Stanford Caffe [tutorial slides](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf)
+- Liu, Ce. Neural Networks 1. Boston University. 2013
+- LeCun, Yann and Bengio, Yoshua and Hinton, Geoffrey. Deep Learning. Nature. Vol 521. 2015
+- Caffe Python API [explanation](http://codrspace.com/Jaleyhd/caffe-python-tutorial/ Caffe Python API Explanation)
+- CMU Caffe [tutorial](http://graphics.cs.cmu.edu/courses/16-824-S15/16824_2015/7.pptx)
+- The Unreasonable Effectiveness of Recurrent Neural Networks [(A. Karpathy blog)](http://karpathy.github.io/2015/05/21/rnn-effectiveness/) 
+- Show and Tell: A Neural Image Caption Generator [paper](http://arxiv.org/pdf/1411.4555v2.pdf) 
+- CVPR 2015 Jeff Donahue's Caffe [tutorial](http://tutorial.caffe.berkeleyvision.org/caffe-cvpr15-sequences.pdf): Sequences in Caffe
