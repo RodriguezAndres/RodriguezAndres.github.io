@@ -44,6 +44,7 @@ The Caffe installation guide [states](http://caffe.berkeleyvision.org/install_ap
 ~~~ bash
 echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
 # alternatively 'source <mkl_path>/mkl/bin/mklvars.sh intel64' if file above doesn't exist
+# and edit mklvars.sh with correct CPRO_PATH=<mkl_path>
 ~~~
 
 The next set of instructions are only needed if using GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability < 3.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
