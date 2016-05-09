@@ -90,7 +90,7 @@ source .bashrc
 # For intelcaffe use:
 git clone https://github.com/intelcaffe/caffe.git 
 cd caffe
-echo "export CAFFE_HOME=`pwd`" >> ~./bashrc
+echo "export CAFFE_HOME=`pwd`" >> ~/.bashrc
 cp Makefile.config.example Makefile.config
 
 # Open Makefile.config and modify it (see comments in the Makefile)
