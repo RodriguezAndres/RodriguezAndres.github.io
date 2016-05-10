@@ -61,7 +61,7 @@ chmod +x $CUDAFILE
 mkdir nvidia_installers
 ./$CUDAFILE -extract=`pwd`/nvidia_installers
 cd nvidia_installers
-NVDIA_INSTALLER=$(ls *NVIDIA*.run)
+NVIDIA_INSTALLER=$(ls *NVIDIA*.run)
 CUDA_INSTALLER=$(ls cuda*rel*.run)
 CUDA_SAMPLES=$(ls cuda*samples*.run)
 sudo ./$NVIDIA_INSTALLER # install nvidia drivers
