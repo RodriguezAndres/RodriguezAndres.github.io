@@ -95,7 +95,7 @@ cp Makefile.config.example Makefile.config
 
 # Open Makefile.config and modify it (see comments in the Makefile)
 vi Makefile.config
-# To run on GPU, uncomment
+# To run on GPU with the cuDNN library, uncomment
 # # USE_CUDNN := 1
 # To run on CPU only and to avoid installing CUDA installers, uncomment
 # # CPU_ONLY := 1
@@ -103,6 +103,10 @@ vi Makefile.config
 # BLAS := mkl
 # BLAS_DIR := /opt/intel/mkl/include
 # BLAS_LIB := /opt/intel/mkl/lib/intel64
+# To use MKL2017 DNN primitives as the default engine, uncomment
+# # USE_MKL2017_AS_DEFAULT_ENGINE := 1
+# and also (temporarily--this will become the default in future releases)
+# # COMMON_FLAGS += -DUSE_MKL2017_NEW_API
 
 # Make
 NUM_CORES=$(grep 'core id' /proc/cpuinfo | sort -u | wc -l)
