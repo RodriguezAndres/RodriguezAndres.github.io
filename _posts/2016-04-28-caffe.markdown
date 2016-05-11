@@ -47,7 +47,9 @@ echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
 # and edit mklvars.sh with correct CPRO_PATH=<mkl_path>
 ~~~
 
-The next set of instructions are only needed if using GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability < 3.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
+The next set of instructions are only needed if using Nvidia GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability < 3.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
+
+Note that in AWS, installing the Nvidia drivers will require additional steps. If using AWS, follow the steps in the [AWS section](http://rodriguezandres.github.io/2016/04/28/caffe/#aws) prior to installing the drivers.
 
 ~~~ bash
 CUDA_VER=7.5
@@ -61,6 +63,9 @@ chmod +x $CUDAFILE
 mkdir nvidia_installers
 ./$CUDAFILE -extract=`pwd`/nvidia_installers
 cd nvidia_installers
+# Notes on installing drivers
+# 1) it is better to used the latest driver from http://www.nvidia.com/Download/index.aspx
+# 2) if using AWS see the steps in the AWS section prior to installing the drivers
 NVIDIA_INSTALLER=$(ls *NVIDIA*.run)
 CUDA_INSTALLER=$(ls cuda*rel*.run)
 CUDA_SAMPLES=$(ls cuda*samples*.run)
@@ -95,11 +100,12 @@ cp Makefile.config.example Makefile.config
 
 # Open Makefile.config and modify it (see comments in the Makefile)
 vi Makefile.config
-# To run on GPU with the cuDNN library, uncomment
+# To run on GPU using the cuDNN library, uncomment
 # # USE_CUDNN := 1
 # To run on CPU only and to avoid installing CUDA installers, uncomment
 # # CPU_ONLY := 1
-# To use MKL replace atlas with mkl as follows
+# To use MKL, replace atlas with mkl as follows
+# (make sure that the BLAS_DIR and BLAS_LIB paths are correct)
 # BLAS := mkl
 # BLAS_DIR := /opt/intel/mkl/include
 # BLAS_LIB := /opt/intel/mkl/lib/intel64
@@ -806,6 +812,27 @@ python average_precision.py
 
 
 ## AWS
+<h4>Installing Nvidia drivers</h4>
+If using Nvidia GPUs, the appropriate driver's need to be installed. The following steps are based on [this](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) blog. Note that two reboots are required.
+
+~~~ bash
+sudo apt-get install linux-image-extra-virtual
+sudo reboot
+# after reboot, disable nouveau
+sudo echo 'blacklist nouveau' >> /etc/modprobe.d/blacklist-nouveau.conf
+sudo echo 'blacklist lbm-nouveau' >> /etc/modprobe.d/blacklist-nouveau.conf
+sudo echo 'options nouveau modeset=0' >> /etc/modprobe.d/blacklist-nouveau.conf
+sudo echo 'alias nouveau off' >> /etc/modprobe.d/blacklist-nouveau.conf
+sudo echo 'alias lbm-nouveau off' >> /etc/modprobe.d/blacklist-nouveau.conf
+# disable the Kernel Nouveau:
+echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
+sudo update-initramfs -u
+sudo reboot
+# Download the latests drivers from http://www.nvidia.com/Download/index.aspx
+# (as of May 11, 2016 for the g2 instances with GRID K520 GPUs use the link below)
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/361.42/NVIDIA-Linux-x86_64-361.42.run
+~~~
+
 <h4>Mounting a volume to an EC2 instance</h4>
 Create a volume (or select existing volume) and attach it to EC2 instance. New volumes are raw block devices, and user needs to create a file system on them before user can mount and use them.
 
@@ -827,6 +854,7 @@ TO DO
 
 <h4>Additional AWS Help</h4>
 
+- [EC2 instance types](https://aws.amazon.com/ec2/instance-types/)
 - [EC2 User Guide](http://docs.aws.amazon.com/AWSEC2/latest/UserGuide/concepts.html)
 - [EC2 pricing](http://aws.amazon.com/ec2/pricing/)
 - [EBS pricing](http://aws.amazon.com/ebs/pricing/)
