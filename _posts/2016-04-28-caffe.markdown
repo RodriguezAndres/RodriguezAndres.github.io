@@ -8,18 +8,18 @@ mathjax: true
 
 "It is comparatively easy to make computers exhibit adult-level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a 1-year-old when it comes to perception and mobility." ~Hans Moravec
 
-The content in this blog was written by some members of my [AFRL](http://www.wpafb.af.mil/AFRL/) team ([Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, [H. Scott Clouse](scottclouse.com)) and I for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position of my employeer (current or previous).
+The content in this blog was written (excluding some minor recent additions) while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) in my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my employeer (current or previous).
 
 * TOC
 {:toc}
 
 ## Summary
-[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term neural because it gives the impression that it resembles an actual neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) code for some architectures, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
+[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term *neural* because it gives the impression that it resembles a biological neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) for devices, [GPU optimized](https://github.com/NVIDIA/caffe/) for devices, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
 
 Vocabulary I use:
 
 - weights (others call them kernels, feature extractors, filters, and paramters) 
-- blob - a 4 dimensional data structure--a 4D tensor--that contains data, gradients, or weights
+- blob - a 4 dimensional data structure--a 4D tensor--that contains data, gradients, or weights (including bias)
 - units (others call them neurons) - performs a non-linear transformation on a data blob
 - feature maps (others call them channels)
 - testing (others call it inference, classification, scoring, or deployment)
@@ -37,14 +37,22 @@ sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
 sudo apt-get install -y libatlas-base-dev # not needed if installing MKL or OpenBLAS
 ~~~
 
+Reasons for dependencies:
+
+- boost: a c++ library. > Use some of its math functions and shared_pointer.
+- glog,gflags provide logging & command line utilities. > Essential for debugging.
+- leveldb, lmdb: database io for your program. > Need to know this for preparing your own data.
+- protobuf: an efficient and flexible way to define data structure. > Need to know this for defining new layers.
+- BLAS (Basic Linear Algebra Subprograms): operations like matrix multiplication, matrix addition, provided by MKL(INTEL), ATLAS, openBLAS, etc.
+
 The Caffe installation guide [states](http://caffe.berkeleyvision.org/install_apt.html): Install "MKL for better CPU performance".
 
-[Download](https://software.intel.com/en-us/articles/free_mkl) and install MKL. To download it, first [register](https://software.intel.com/en-us/articles/free_mkl) for a free community license and follow the instructions. Then
+[Download](https://software.intel.com/en-us/articles/free_mkl) and install MKL. To download it, first [register](https://software.intel.com/en-us/articles/free_mkl) for a free community license and follow the installation instructions. Then
 
 ~~~ bash
 echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
-# alternatively 'source <mkl_path>/mkl/bin/mklvars.sh intel64' if file above doesn't exist
-# and edit mklvars.sh with correct CPRO_PATH=<mkl_path>
+# alternatively edit <mkl_path>/mkl/bin/mklvars.sh with correct CPRO_PATH=<mkl_path>
+# and 'source <mkl_path>/mkl/bin/mklvars.sh intel64' if file above doesn't exist
 ~~~
 
 The next set of instructions are only needed if using Nvidia GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability < 3.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
@@ -52,8 +60,8 @@ The next set of instructions are only needed if using Nvidia GPUs. The GPU devic
 Note that in AWS, installing the Nvidia drivers will require additional steps. If using AWS, follow the steps in the [AWS section](http://rodriguezandres.github.io/2016/04/28/caffe/#aws) prior to installing the drivers.
 
 ~~~ bash
-CUDA_VER=7.5
-VER_UPDATE=18
+CUDA_VER=7.5 # modify to current version
+VER_UPDATE=18 # modify to current version
 
 # This first set of commands can be ignored if using a
 # server with Nvidia drivers and CUDA already installed
@@ -64,12 +72,13 @@ mkdir nvidia_installers
 ./$CUDAFILE -extract=`pwd`/nvidia_installers
 cd nvidia_installers
 # Notes on installing drivers
-# 1) it is better to used the latest driver from http://www.nvidia.com/Download/index.aspx
+# 1) it may be better to used the latest drivers from http://www.nvidia.com/Download/index.aspx
+#    instead of the extracted one
 # 2) if using AWS see the steps in the AWS section prior to installing the drivers
-NVIDIA_INSTALLER=$(ls *NVIDIA*.run)
+NVIDIA_DRIVERS=$(ls *NVIDIA*.run)
 CUDA_INSTALLER=$(ls cuda*rel*.run)
 CUDA_SAMPLES=$(ls cuda*samples*.run)
-sudo ./$NVIDIA_INSTALLER # install nvidia drivers
+sudo ./$NVIDIA_DRIVERS # install nvidia drivers (ignore this is already installed w/AWS steps below)
 sudo ./$CUDA_INSTALLER # install CUDA
 sudo ./$CUDA_SAMPLES # install samples
 
@@ -95,7 +104,7 @@ source .bashrc
 # For intelcaffe use:
 git clone https://github.com/intelcaffe/caffe.git 
 cd caffe
-echo "export CAFFE_HOME=`pwd`" >> ~/.bashrc
+echo "export CAFFE_ROOT=`pwd`" >> ~/.bashrc
 cp Makefile.config.example Makefile.config
 
 # Open Makefile.config and modify it (see comments in the Makefile)
@@ -116,7 +125,9 @@ vi Makefile.config
 
 # Make
 NUM_CORES=$(grep 'core id' /proc/cpuinfo | sort -u | wc -l)
-make -j $NUM_CORES # uses all the cores in make
+make -j $NUM_CORES 2>&1 | tee makelog.log # uses all the cores in make and saves output
+# To save the output stream to file makestdout.log use this instead
+# make -j $NUM_CORES 2>&1 | tee makestdout.log
 
 # The steps below are OPTIONAL but highly recommended to use the python interface
 sudo apt-get -y install gfortran python-dev python-pip
@@ -128,7 +139,7 @@ sudo ln -s /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/ \
   /usr/local/include/python2.7/numpy
 echo 'sudo ln /dev/null /dev/raw1394' >> ~/.bashrc
 make pycaffe -j NUM_CORES
-echo 'export PYTHONPATH=$CAFFE_HOME/python' >> ~/.bashrc
+echo 'export PYTHONPATH=$CAFFE_ROOT/python' >> ~/.bashrc
 
 # The steps below are OPTIONAL to test caffe (recommended 1st time only)
 make test -j $NUM_CORES
@@ -161,7 +172,7 @@ For example, the [create_label_file.py](https://github.com/RodriguezAndres/Kaggl
 Note that in testing we assume that the labels are missing. If labels are available these same steps can be applied to prepare an lmdb test dataset.
 
 <h4>Preparing data with 3 channels (e.g., RGB images)</h4>
-The example below (based on [this](http://caffe.berkeleyvision.org/gathered/examples/imagenet.html)) produces a training and a validation lmdb, and therefore requires two text files, train.txt and val.txt. It runs from the `$CAFFE_HOME` directory. Note that in this example it assumes the training and validation images are in the same folder.
+The example below (based on [this](http://caffe.berkeleyvision.org/gathered/examples/imagenet.html)) produces a training and a validation lmdb, and therefore requires two text files, train.txt and val.txt. It runs from the `$CAFFE_ROOT` directory. Note that in this example it assumes the training and validation images are in the same folder.
 
 ~~~ bash
 #!/usr/bin/env sh
@@ -241,12 +252,167 @@ plt.show()
 <h4>Preparing data with various channels</h4>
 Gray scale images (1-channel), RADAR images (2-channels), videos (4 channels), image+depth (4 channels), vibrometry (1 channel), and spectrograms (1-channel) required a wrapper in order to set the lmdb dataset (see [this blog script](https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045) as a guide).
 
+## Data Layer
+The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorials. Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or LMDB), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats.
+
+Common input preprocessing (mean subtraction, scaling, random cropping, and mirroring) is available by specifying `transform_params` (not supported in all data types, e.g., HDF5). If the required data transformations are performend beforehand, then there is no need to use this option in the data layer.
+
+Note that it is common but not required to have the same name for the layer and the blob coming out of the layer, i.e., in the prototxt files in each layer `name` and `top` are usually the same.
+
+<h4>Data</h4>
+LMDB and LevelDB database formats can be efficiently process as input data. Only good for 1-of-k classification. Use this if possible.
+
+Parameters
+
+- Required
+  - `source`: the name of the directory containing the database
+  - `batch_size`: the number of inputs to process at one time
+- Optional
+  - `backend` [default LEVELDB]: choose whether to use a LEVELDB or LMDB
+  - `rand_skip`: skip this number of inputs at the beginning; maybe useful for async sgd
+
+In this example the images are cropped, mirrored, and have the mean subtracted.
+
+~~~ bash
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: 1 # 1 = on, 0 = off
+    # crop a `crop_size` x `crop_size` patch:
+    # - at random during training
+    # - from the center during testing
+    crop_size: 227
+    mean_value: 104
+    mean_value: 117
+    mean_value: 123
+  }
+  data_param {
+    source: "examples/imagenet/ilsvrc12_train_lmdb"
+    batch_size: 32
+    backend: LMDB
+  }
+}
+~~~
+
+<h4>MemoryData</h4>
+The memory data layer reads data directly from memory, without copying it. In order to use it, one must call `MemoryDataLayer::Reset` (from C++) or `Net.set_input_arrays` (from Python) in order to specify a source of contiguous data (as 4D row major array), which is read one batch-sized chunk at a time.
+
+This is the most efficient method as it assumes that data is already in memory. Otherwise, it can be slow as it requires manually copying the data into memory prior to using it.
+
+Parameters
+
+- Required
+  - `batch_size`, `channels`, `height`, `width`: specify the size of input chunks to read from memory 
+
+~~~ bash
+layers {
+  name: "data"
+  type: MEMORY_DATA
+  top: "data"
+  top: "label"
+  memory_data_param {
+   batch_size: 32
+   channels: 3
+   height: 227
+   width: 227
+  }
+ transform_param {
+    crop_size: 227
+    mirror: true
+    mean_file: "mean.binaryproto"
+  }
+~~~
+
+<h4>HDF5Data</h4>
+Reads arbitrary data from HDF5 files. Good for any task but only uses FP32 and FP64 data (not uint8), so image data will be huge. Does not allow `transform_param`. Only use this if you have to.
+
+Parameters
+
+- Required
+  - source: the name of the file to read from
+  - batch_size
+
+~~~ bash
+layer {
+  name: "data"
+  type: "HDF5_DATA"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+    source: "examples/hdf5_classification/data/train.txt"
+    batch_size: 32
+    backend: LMDB
+  }
+}
+~~~
+
+<h4>HDF5DataOutput</h4>
+The HDF5 output layer performs the opposite function of the other layers in this section: it writes its input blobs to disk.
+
+
+<h4>ImageData</h4>
+Get images and labels directly from image files.
+
+
+<h4>WindowData</h4>
+Made for detection. Read windows from image files class labels.
+
+<h4>DummyData</h4>
+Used in debugging and can be used in benchmarking forward and backward times
+
+Example based on [this](https://github.com/BVLC/caffe/blob/master/examples/pycaffe/linreg.prototxt) one.
+
+~~~ bash
+layer {
+  name: "data"
+  type: "DummyData"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  dummy_data_param {
+    data_filler {
+      type: "constant"
+      value: 0.01
+    }
+    shape { dim: 32 dim: 3 dim: 224 dim: 224 }
+  }
+}
+layer {
+  name: "data"
+  type: "DummyData"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  dummy_data_param {
+    data_filler {
+      type: "constant"
+    }
+    shape { dim: 32 }
+  }
+}
+~~~
+
+
 ## Training
 Training requires:
 
 - train_val.prototxt: defines the network architecture, initialization parameters, and local learning rates
 - solver.prototxt: defines optimization/training parameters and serves as the actual file that's called to train a deep network
 - (deploy.prototxt: actually this is used only in testing; is similar to train_val.prototxt but without the local learning rates, initialization values, and data layer)
+
+Note that it is common but not required to have the same name for the layer and the blob coming out of the layer, i.e., in the prototxt files in each layer `name` and `top` are usually the same.
+
 
 A description of what each layer does can be found [here](http://caffe.berkeleyvision.org/tutorial/layers.html). Initialization parameters are extremely important; they are set [here](https://github.com/BVLC/caffe/blob/master/include/caffe/filler.hpp here); some [tips](http://andyljones.tumblr.com/post/110998971763/an-explanation-of-xavier-initialization) worth mentioning:
 
@@ -306,24 +472,31 @@ snapshot_prefix: "examples/mnist/lenet_multistep"
 solver_mode: CPU
 ~~~
 
-Training speed. The time command measure the forward and backward propogation time, but does not include the time for the optimization algorithm to iterate and update the weights.
-
-~~~ bash
-# Computes 50 iterations and returns forward, backward, and total time
-# for each iteration and the average
-$CAFFE_HOME/build/tools/caffe time --model=train_val.prototxt -iterations 50
-~~~
-
 Train the network:
 
 ~~~ bash
 # The name of the output file (aka the trained weights) is in solver.prototxt
-$CAFFE_HOME/build/tools/caffe train -solver solver.prototxt
+$CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt
+~~~
+
+If using GPU, to specify a device or a group of devices use the `-gpu <gpu ids>` argument, where `<gpu ids>` can range from `0` to `numGPUs-1`. This works in training, fine-tuning, timing, or testing. The following examples are for training but the same applies in fine-tuning, timing, or testing.
+
+~~~ bash
+# train on GPU device 2
+./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt -gpu 2
+# train on GPUs devices 0 & 1 (doubles the batch size)
+./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt -gpu 0,1
+# train on all GPUs on node (multiplies batch size by number of GPU devices)
+./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt -gpu all
+
+# side note: each GPU device can be diagnosed
+./build/tools/caffe devices_query -gpu 2
 ~~~
 
 Training will produce two files:
-- somename_iter_NUMITER.caffemodel: weights of the architecture to be used in testing
-- somename_iter_NUMITER.solverstate: used if training dies (e.g., power outage) to resume training from current iteration
+
+- *\<somename_numiter\>.caffemodel*: weights of the architecture to be used in testing
+- *\<somename_numiter\>.solverstate*: used if training dies (e.g., power outage) to resume training from current iteration
 
 To train the network and plot the validation accuracy or loss vs iterations:
 
@@ -338,8 +511,8 @@ To train the network and plot the validation accuracy or loss vs iterations:
 #  6: Train loss  vs. Iters
 #  7: Train loss  vs. Seconds
 CHART_TYPE=0
-$CAFFE_HOME/build/tools/caffe train -solver solver.prototxt &> logfile.log
-python $CAFFE_HOME/tools/extra/plot_training_log.py.example $CHART_TYPE name_of_plot.png logfile.log
+$CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt 2>&1 | tee logfile.log
+python $CAFFE_ROOT/tools/extra/plot_training_log.py.example $CHART_TYPE name_of_plot.png logfile.log
 ~~~
 
 Dropout and Dropconnect:
@@ -390,10 +563,24 @@ layer {
 }
 ~~~
 
+Measuring forward and backward propagation time (not weight updates):
+
+~~~ bash
+# Computes 50 iterations and returns forward, backward, and total time and the average
+# note that the training samples and mean.binaryproto may be required or
+# alternatively, use dummy variables
+NUMITER=50
+$CAFFE_ROOT/build/tools/caffe time --model=train_val.prototxt -iterations $NUMITER
+~~~
+
+<h4>Model Zoo</h4>
+The [Caffe Model Zoo](https://github.com/BVLC/caffe/wiki/Model-Zoo) is a collection of trained deep learning models and/or prototxt files used for a variety of tasks. These models can be used in fine-tuning or testing.
+
+
 ## Fine-tuning
 Recyle the layer definition prototxt file and made the following two changes:
 
-1) Change the data layer to include the new data:
+1. Change the data layer to include the new data:
 
 ~~~ bash
 layer {
@@ -412,7 +599,7 @@ layer {
 }
 ~~~
 
-2) Change the last layer, e.g., "fc2-ft" (note: in testing, make this same change to the deploy.prototxt file)
+2. Change the last layer, e.g., "fc2-ft" (note: in testing, make this same change to the deploy.prototxt file)
 
 ~~~ bash
 layer {
@@ -438,7 +625,7 @@ layer {
 Invoke caffe, i.e., train or, more precisely, fine-tune:
 
 ~~~ bash
-#From the command line on $CAFFE_HOME
+#From the command line on $CAFFE_ROOT
 ./build/tools/caffe train -solver name_of_solver.prototxt -weights already_trained_binary_model.caffemodel
 ~~~
 
@@ -467,7 +654,7 @@ To classify an image (or signal) or set of images you need:
 - Network architecture
 - Network weights
 
-The modules used for testing are Classifier, load_image and predict:
+The python interface is very handy in testing. The modules used for testing are Classifier, load_image and predict:
 
 - net = caffe.Classifier
   - INPUTS: architecture (model_file) and weights (pretrained_file)
@@ -494,17 +681,17 @@ import numpy as np
 
 # Make sure that caffe is on the python path:
 import sys 
-CAFFE_HOME = '/home/ubuntu/caffe/' # CHANGE THIS LINE TO YOUR Caffe PATH
-sys.path.insert(0, CAFFE_HOME + 'python')
+CAFFE_ROOT = '/home/ubuntu/caffe/' # CHANGE THIS LINE TO YOUR Caffe PATH
+sys.path.insert(0, CAFFE_ROOT + 'python')
 
 import caffe
 
 # Set the right path to your model definition file, pretrained model weights,
 # and the image you would like to classify.
-MODEL_FILE = CAFFE_HOME + 'models/bvlc_reference_caffenet/deploy.prototxt'
-PRETRAINED = CAFFE_HOME + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel' #Weights to be used w/MODEL_FILE
-IMAGE_FILE1 = CAFFE_HOME + 'examples/images/cat.jpg'
-IMAGE_FILE2 = CAFFE_HOME + 'examples/images/fish-bike.jpg'
+MODEL_FILE = CAFFE_ROOT + 'models/bvlc_reference_caffenet/deploy.prototxt'
+PRETRAINED = CAFFE_ROOT + 'models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel' #Weights to be used w/MODEL_FILE
+IMAGE_FILE1 = CAFFE_ROOT + 'examples/images/cat.jpg'
+IMAGE_FILE2 = CAFFE_ROOT + 'examples/images/fish-bike.jpg'
 
 # Download weight file if not found
 import os
@@ -522,13 +709,13 @@ caffe.set_mode_cpu()
 #  input channel swapping takes care of mapping RGB into the reference ImageNet model's BGR order
 #  raw scaling multiplies the feature scale from the input [0,1] to the ImageNet model's [0,255]
 net = caffe.Classifier(MODEL_FILE, PRETRAINED,
-                       mean=np.load(CAFFE_HOME + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1),
+                       mean=np.load(CAFFE_ROOT + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1),
                        channel_swap=(2,1,0),
                        raw_scale=255,
                        image_dims=(256, 256))
 # Alternatively, the above could have been written as:
 #net = caffe.Classifier(MODEL_FILE, PRETRAINED)
-#net.transformer.set_mean('data', np.load(CAFFE_HOME + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1))
+#net.transformer.set_mean('data', np.load(CAFFE_ROOT + 'python/caffe/imagenet/ilsvrc_2012_mean.npy').mean(1).mean(1))
 #net.transformer.set_raw_scale('data', 255)  # reference model operates on [0,255] range instead of [0,1]
 #net.transformer.set_channel_swap('data', (2,1,0))  # the reference model has channels in BGR order instead of RGB
 
@@ -569,6 +756,14 @@ input_images = [ caffe.io.load_image(IMAGES_FOLDER + im) for im in images ]
 ~~~
 
 Note that the entire test set may not fit in memory, so in same architectures, it may be better to do the predictions in batches of (say) 100.
+
+Testing from the command line seems to be less flexible and using Python is my preferred choice. Note that the file with the model should have a 'phase: TEST' in the data layer in order to test the model.
+
+~~~ bash
+#./build/tools/caffe test -model <model_filename> -weights <somename_numiter>.caffemodel -iterations <how many iteratiosn/mini-batches to train>
+#  -iterations: to use all val imgs use iter = numValImgs / batchSize
+./build/tools/caffe test -model models/bvlc_reference_caffenet/train_val.prototxt -weights models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel -iterations 50
+~~~
 
 
 ## Feature extractor and visualization
@@ -684,7 +879,44 @@ Above, the name of the feature blob that is extracted is ''fc7'', which represen
 Upon issuing the command, if the following error is received, "Check failed: status.ok() Failed to open leveldb examples/_temp/features", it's because the directory ''examples/_temp/features'' has been created the last time the command was issued. Remove directory and run again.
 
 
-## Experiments
+## Examples
+<h4>LeNet on MNIST</h4>
+The purpose of this section is to experiment with preparing a dataset, training a model, timing the model, and using multiple GPUs in one node. The content comes from [here](http://caffe.berkeleyvision.org/gathered/examples/mnist.html) and [here](http://caffe.berkeleyvision.org/tutorial/interfaces.html).
+
+Preparing datasets
+
+~~~ bash
+cd $CAFFE_ROOT
+./data/mnist/get_mnist.sh # downloads MNIST dataset
+./examples/mnist/create_mnist.sh # creates dataset in LMDB format
+~~~
+
+Training dataset
+
+~~~ bash
+# Reduce the number of iterations from 10K to 1K to quickly run through this example
+sed -i 's/max_iter: 10000/max_iter: 1000/g' examples/mnist/lenet_solver.prototxt
+# CPU or GPU usage is defined in the solver.prototxt file
+./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt
+#./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt -gpu all # to use all GPUs
+~~~
+
+Timing the forward + backward propogations (not including weight updates)
+
+~~~ bash
+./build/tools/caffe time --model=examples/mnist/lenet_train_test.prototxt -iterations 50 # runs on CPU
+#./build/tools/caffe time --model=examples/mnist/lenet_train_test.prototxt -gpu 0 -iterations 50 # uses GPU 0
+~~~
+
+Testing the trained model. In this example it is tested in the validation test. In practice, it should be tested with a different dataset using the formate below or the format explained [above](http://rodriguezandres.github.io/2016/04/28/caffe/#testing).
+
+~~~ bash
+#./build/tools/caffe test -model <model_filename> -weights <somename_numiter>.caffemodel -iterations <how many iteratiosn/mini-batches to train>
+# the file with the model should have a 'phase: TEST' in order to test the model
+./build/tools/caffe test -model examples/mnist/lenet_train_test.prototxt -weights examples/mnist/lenet_iter_1000.caffemodel -iterations 50
+~~~
+
+
 <h4>Dogs vs Cats</h4>
 Get an account with [Kaggle](https://www.kaggle.com/) and download the [data](https://www.kaggle.com/c/dogs-vs-cats/data). Note that you cannot just do wget because you have to login to Kaggle. Login to Kaggle, download data, and transfer it to your machine
 
@@ -692,7 +924,7 @@ Unzip [dogvscat.zip](https://github.com/RodriguezAndres/Kaggle-dogs-vs-cats/blob
 
 ~~~ bash
 #!/usr/bin/env sh
-CAFFE_HOME=/home/ubuntu/caffe
+CAFFE_ROOT=/home/ubuntu/caffe
 mkdir dogvscat
 DOG_VS_CAT_FOLDER=/home/ubuntu/dogvscat
 
@@ -711,11 +943,11 @@ python create_label_file.py # creates 2 text files with labels for training and 
 ./build_datasets.sh # build lmdbs
 
 # Download ImageNet pretrained weights (takes ~20 min)
-$CAFFE_HOME/scripts/download_model_binary.py $CAFFE_HOME/models/bvlc_reference_caffenet 
+$CAFFE_ROOT/scripts/download_model_binary.py $CAFFE_ROOT/models/bvlc_reference_caffenet 
 
 # Fine-tune weights in the AlexNet architecture (takes ~100 min)
-$CAFFE_HOME/build/tools/caffe train -solver $DOG_VS_CAT_FOLDER/dogvscat_solver.prototxt \
-    -weights $CAFFE_HOME/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel 
+$CAFFE_ROOT/build/tools/caffe train -solver $DOG_VS_CAT_FOLDER/dogvscat_solver.prototxt \
+    -weights $CAFFE_ROOT/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel 
 
 # Classify test dataset
 cd $DOGVSCAT_FOLDER
@@ -741,7 +973,7 @@ Unzip [voc2012.zip](https://github.com/RodriguezAndres/Pascal-VOC-2012/blob/mast
 #  libdc1394 error: Failed to initialize libdc1394
 
 # set Caffe root directory
-CAFFE_HOME=$CAFFE_HOME
+CAFFE_ROOT=$CAFFE_ROOT
 VOC=/home/ubuntu/voc2012
 
 chmod 700 *.sh
@@ -767,19 +999,17 @@ python create_labeled_txt_file.py
  
 # Execute following command to download caffenet pre-trained weights (takes ~20 min)
 #  if weights exist already then the command is ignored
-$CAFFE_HOME/scripts/download_model_binary.py $CAFFE_HOME/models/bvlc_reference_caffenet
+$CAFFE_ROOT/scripts/download_model_binary.py $CAFFE_ROOT/models/bvlc_reference_caffenet
  
 # Fine-tune weights in the AlexNet architecture (takes ~60 min)
 # you can also chose one of six solvers: pascal_solver[1-6].prototxt
-$CAFFE_HOME/build/tools/caffe train -solver $VOC/solvers/voc2012_solver.prototxt \
-  -weights $CAFFE_HOME/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
+$CAFFE_ROOT/build/tools/caffe train -solver $VOC/solvers/voc2012_solver.prototxt \
+  -weights $CAFFE_ROOT/models/bvlc_reference_caffenet/bvlc_reference_caffenet.caffemodel
 
 # The lines below are not really needed; they served as examples on how to do some tasks
 
 # Test against voc2012_val_lmbd dataset (name of lmdb is the model under PHASE: test)
-#  -gpu 0: using the GPU 0 in the machine (numbered from 0 to numGPUs-1)
-#  -iterations: to use all val imgs use iter = numValImgs / batchSize
- $CAFFE_HOME/build/tools/caffe test -model $VOC/nets/voc2012_train_val_ft678.prototxt \
+ $CAFFE_ROOT/build/tools/caffe test -model $VOC/nets/voc2012_train_val_ft678.prototxt \
    -weights $VOC/weights_iter_5000.caffemodel -iterations 116
 
 # Classify validation dataset: returns a file w/the labels of the val dataset
@@ -813,7 +1043,7 @@ python average_precision.py
 
 ## AWS
 <h4>Installing Nvidia drivers</h4>
-If using Nvidia GPUs, the appropriate driver's need to be installed. The following steps are based on [this](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) blog. Note that two reboots are required.
+If using Nvidia GPUs, the appropriate driver's need to be installed. The following steps are based on [this](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) blog. Note that two reboots are required. After following these steps, installation can continue using the steps [above](http://rodriguezandres.github.io/2016/04/28/caffe/#installation) ignoring the installation of Nvidia drivers in those steps.
 
 ~~~ bash
 sudo apt-get install linux-image-extra-virtual
@@ -824,13 +1054,19 @@ sudo echo 'blacklist lbm-nouveau' >> /etc/modprobe.d/blacklist-nouveau.conf
 sudo echo 'options nouveau modeset=0' >> /etc/modprobe.d/blacklist-nouveau.conf
 sudo echo 'alias nouveau off' >> /etc/modprobe.d/blacklist-nouveau.conf
 sudo echo 'alias lbm-nouveau off' >> /etc/modprobe.d/blacklist-nouveau.conf
-# disable the Kernel Nouveau:
+# disable the Kernel nouveau
 echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
 sudo update-initramfs -u
 sudo reboot
+# get Kernel source
+sudo apt-get install linux-source
+sudo apt-get install linux-headers-$(uname -r)
 # Download the latests drivers from http://www.nvidia.com/Download/index.aspx
-# (as of May 11, 2016 for the g2 instances with GRID K520 GPUs use the link below)
-wget http://us.download.nvidia.com/XFree86/Linux-x86_64/361.42/NVIDIA-Linux-x86_64-361.42.run
+# (as of May 11, 2016 for the g2 instances with GRID K520 GPUs use the version below)
+DRIVER_VERSION=361.42 # update this line with the latests driver from link above
+NVIDIA_DRIVERS=NVIDIA-Linux-x86_64-$DRIVER_VERSION.run
+wget http://us.download.nvidia.com/XFree86/Linux-x86_64/$DRIVER_VERSION/$NVIDIA_DRIVERS
+sudo ./$NVIDIA_DRIVERS
 ~~~
 
 <h4>Mounting a volume to an EC2 instance</h4>

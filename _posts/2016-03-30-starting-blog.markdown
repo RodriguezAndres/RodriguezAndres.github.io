@@ -77,7 +77,14 @@ git add _post/mypost.md # use git add -A to add all modified files and delete de
 git commit -m "added cool stuff to mypost"
 git push origin master
 ~~~ 
+
 Note that every modified file (including those already in the local repository) needs to be added prior to committing (this is a different use of `add` than in SVN; in SVN only new files into the repo need are added).
+
+To update the local from the master
+
+~~~ bash
+git pull
+~~~
 
 For the curious, [here](http://stackoverflow.com/questions/572549/difference-between-git-add-a-and-git-add) is an example showing the various ways to add files
 
