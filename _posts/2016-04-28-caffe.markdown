@@ -8,21 +8,28 @@ mathjax: true
 
 "It is comparatively easy to make computers exhibit adult-level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a 1-year-old when it comes to perception and mobility." ~Hans Moravec
 
-The content in this blog was written (excluding some minor recent additions) while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) in my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my employeer (current or previous).
+The content in this blog was written (excluding some minor recent additions) while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) from my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my employeer (current or previous).
 
 * TOC
 {:toc}
 
 ## Summary
-[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term *neural* because it gives the impression that it resembles a biological neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) for devices, [GPU optimized](https://github.com/NVIDIA/caffe/) for devices, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
+[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term *neural* because it gives the impression that it resembles a biological neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) for some architectures, [GPU optimized](https://github.com/NVIDIA/caffe/) for some architectures, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
 
 Vocabulary I use:
 
-- weights (others call them kernels, feature extractors, filters, and paramters) 
+- weights (others call them kernels, feature extractors, filters, and parameters) 
 - blob - a 4 dimensional data structure--a 4D tensor--that contains data, gradients, or weights (including bias)
 - units (others call them neurons) - performs a non-linear transformation on a data blob
 - feature maps (others call them channels)
 - testing (others call it inference, classification, scoring, or deployment)
+
+A fast way to become familiar with Caffe is:
+
+- [Install](http://rodriguezandres.github.io/2016/04/28/caffe/#installation) it
+- [Train LeNet on MNIST](http://rodriguezandres.github.io/2016/04/28/caffe/#examples)
+- Used a trained model to [test](http://rodriguezandres.github.io/2016/04/28/caffe/#testing) some images from the web
+- [Fine-tune](http://rodriguezandres.github.io/2016/04/28/caffe/#fine-tuning) a trained model on the [Cats vs Dogs challenge](http://rodriguezandres.github.io/2016/04/28/caffe/#examples)
 
 ## Installation
 On Ubuntu 14.04. Get dependencies:
