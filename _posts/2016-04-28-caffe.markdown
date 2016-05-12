@@ -44,7 +44,7 @@ sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
 sudo apt-get install -y libatlas-base-dev # not needed if installing MKL or OpenBLAS
 ~~~
 
-Reasons for dependencies ([source](http://graphics.cs.cmu.edu/courses/16-824/2016_spring/slides/caffe_tutorial.pdf)
+Reasons for dependencies ([source](http://graphics.cs.cmu.edu/courses/16-824/2016_spring/slides/caffe_tutorial.pdf))
 
 - boost: a c++ library. > Use some of its math functions and shared_pointer.
 - glog,gflags provide logging & command line utilities. > Essential for debugging.
