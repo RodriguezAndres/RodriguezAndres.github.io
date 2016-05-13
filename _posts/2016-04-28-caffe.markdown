@@ -8,7 +8,7 @@ mathjax: true
 
 "It is comparatively easy to make computers exhibit adult-level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a 1-year-old when it comes to perception and mobility." ~Hans Moravec
 
-The content in this blog was written (excluding some minor recent additions) while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) from my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my employeer (current or previous).
+I wrote the content in this blog while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) (excluding some minor recent additions) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) from my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my employeer (current or previous).
 
 * TOC
 {:toc}
@@ -19,7 +19,7 @@ The content in this blog was written (excluding some minor recent additions) whi
 Vocabulary I use:
 
 - weights (others call them kernels, feature extractors, filters, and parameters) 
-- blob - a 4 dimensional data structure--a 4D tensor--that contains data, gradients, or weights (including bias)
+- blob - a 4 dimensional data structure, i.e., a 4D tensor, that contains data, gradients, or weights (including biases)
 - units (others call them neurons) - performs a non-linear transformation on a data blob
 - feature maps (others call them channels)
 - testing (others call it inference, classification, scoring, or deployment)
@@ -44,13 +44,13 @@ sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
 sudo apt-get install -y libatlas-base-dev # not needed if installing MKL or OpenBLAS
 ~~~
 
-Reasons for dependencies ([source](http://graphics.cs.cmu.edu/courses/16-824/2016_spring/slides/caffe_tutorial.pdf))
+Reasons for dependencies ([source](http://graphics.cs.cmu.edu/courses/16-824/2016_spring/slides/caffe_tutorial.pdf)):
 
-- boost: a c++ library. > Use some of its math functions and shared_pointer.
-- glog,gflags provide logging & command line utilities. > Essential for debugging.
-- leveldb, lmdb: database io for your program. > Need to know this for preparing your own data.
-- protobuf: an efficient and flexible way to define data structure. > Need to know this for defining new layers.
-- BLAS (Basic Linear Algebra Subprograms): operations like matrix multiplication, matrix addition, provided by MKL(INTEL), ATLAS, openBLAS, etc.
+- boost`: a C++ library used for its math functions and shared pointer.
+- glog`, `gflags`: provides logging & command line utilities. Essential for debugging.
+- `leveldb`, `lmdb`: database IO. Use for preparing your own data.
+- `protobuf`: used to efficiently define data structure.
+- `BLAS` (Basic Linear Algebra Subprograms): operations like matrix multiplication, matrix addition, provided by MKL (Intel), ATLAS, openBLAS, etc.
 
 The Caffe installation guide [states](http://caffe.berkeleyvision.org/install_apt.html): Install "MKL for better CPU performance".
 
@@ -59,7 +59,7 @@ The Caffe installation guide [states](http://caffe.berkeleyvision.org/install_ap
 ~~~ bash
 echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
 # alternatively edit <mkl_path>/mkl/bin/mklvars.sh with correct CPRO_PATH=<mkl_path>
-# and 'source <mkl_path>/mkl/bin/mklvars.sh intel64' if file above doesn't exist
+# and 'source <mkl_path>/mkl/bin/mklvars.sh intel64'
 ~~~
 
 The next set of instructions are only needed if using Nvidia GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability < 3.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
