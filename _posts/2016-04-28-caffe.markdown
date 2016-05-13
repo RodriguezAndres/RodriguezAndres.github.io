@@ -259,8 +259,8 @@ plt.show()
 <h4>Preparing data with various channels</h4>
 Gray scale images (1-channel), RADAR images (2-channels), videos (4 channels), image+depth (4 channels), vibrometry (1 channel), and spectrograms (1-channel) required a wrapper in order to set the lmdb dataset (see [this blog script](https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045) as a guide).
 
-## Data Layer
-The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorial. Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or LMDB), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats.
+<h3>Data Layer</h3>
+Optional material, i.e., understanding this section is not critical to learning to train networks. The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorial. Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or LMDB), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats.
 
 Common input preprocessing (mean subtraction, scaling, random cropping, and mirroring) is available by specifying `transform_params` (not supported in all data types, e.g., HDF5). If the required data transformations are performend beforehand, then there is no need to use this option in the data layer.
 
