@@ -260,7 +260,7 @@ plt.show()
 Gray scale images (1-channel), RADAR images (2-channels), videos (4 channels), image+depth (4 channels), vibrometry (1 channel), and spectrograms (1-channel) required a wrapper in order to set the lmdb dataset (see [this blog script](https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045) as a guide).
 
 ## Data Layer
-The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorials. Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or LMDB), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats.
+The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorial. Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or LMDB), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats.
 
 Common input preprocessing (mean subtraction, scaling, random cropping, and mirroring) is available by specifying `transform_params` (not supported in all data types, e.g., HDF5). If the required data transformations are performend beforehand, then there is no need to use this option in the data layer.
 
@@ -310,7 +310,7 @@ layer {
 <h4>MemoryData</h4>
 The memory data layer reads data directly from memory, without copying it. In order to use it, one must call `MemoryDataLayer::Reset` (from C++) or `Net.set_input_arrays` (from Python) in order to specify a source of contiguous data (as 4D row major array), which is read one batch-sized chunk at a time.
 
-This is the most efficient method as it assumes that data is already in memory. Otherwise, it can be slow as it requires manually copying the data into memory prior to using it.
+This is the most efficient method as it assumes that data is already in memory. However, it can be slow as it may require manually copying the data into memory prior to using it.
 
 Parameters
 
@@ -374,7 +374,7 @@ Get images and labels directly from image files.
 Made for detection. Read windows from image files class labels.
 
 <h4>DummyData</h4>
-Used in debugging and can be used in benchmarking forward and backward times
+Used in debugging.
 
 Example based on [this](https://github.com/BVLC/caffe/blob/master/examples/pycaffe/linreg.prototxt) one.
 
@@ -414,9 +414,9 @@ layer {
 ## Training
 Training requires:
 
-- train_val.prototxt: defines the network architecture, initialization parameters, and local learning rates
-- solver.prototxt: defines optimization/training parameters and serves as the actual file that's called to train a deep network
-- (deploy.prototxt: actually this is used only in testing; is similar to train_val.prototxt but without the local learning rates, initialization values, and data layer)
+- `train_val.prototxt`: defines the network architecture, initialization parameters, and local learning rates
+- `solver.prototxt`: defines optimization/training parameters and serves as the actual file that's called to train a deep network
+- (`deploy.prototxt`: actually this is used only in testing; is similar to train_val.prototxt but without the local learning rates, initialization values, and data layer)
 
 Note that it is common but not required to have the same name for the layer and the blob coming out of the layer, i.e., in the prototxt files in each layer `name` and `top` are usually the same.
 
@@ -486,7 +486,7 @@ Train the network:
 $CAFFE_ROOT/build/tools/caffe train -solver solver.prototxt
 ~~~
 
-If using GPU, to specify a device or a group of devices use the `-gpu <gpu ids>` argument, where `<gpu ids>` can range from `0` to `numGPUs-1`. This works in training, fine-tuning, timing, or testing. The following examples are for training but the same applies in fine-tuning, timing, or testing.
+If using GPU, to specify a device or a group of devices use the `-gpu <gpu ids>` argument, where `<gpu ids>` can range from `0` to `numGPUs-1`. This works in training, timing, fine-tuning, or testing. The following examples are for training but the same applies in timing, fine-tuning, or testing.
 
 ~~~ bash
 # train on GPU device 2
@@ -905,14 +905,12 @@ Training dataset
 sed -i 's/max_iter: 10000/max_iter: 1000/g' examples/mnist/lenet_solver.prototxt
 # CPU or GPU usage is defined in the solver.prototxt file
 ./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt
-#./build/tools/caffe train -solver examples/mnist/lenet_solver.prototxt -gpu all # to use all GPUs
 ~~~
 
 Timing the forward + backward propogations (not including weight updates)
 
 ~~~ bash
 ./build/tools/caffe time --model=examples/mnist/lenet_train_test.prototxt -iterations 50 # runs on CPU
-#./build/tools/caffe time --model=examples/mnist/lenet_train_test.prototxt -gpu 0 -iterations 50 # uses GPU 0
 ~~~
 
 Testing the trained model. In this example it is tested in the validation test. In practice, it should be tested with a different dataset using the formate below or the format explained [above](http://rodriguezandres.github.io/2016/04/28/caffe/#testing).
