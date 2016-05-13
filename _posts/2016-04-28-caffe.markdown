@@ -16,6 +16,7 @@ I wrote the content in this blog while I was at [AFRL](http://www.wpafb.af.mil/A
 ## Summary
 [Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term *neural* because it gives the impression that it resembles a biological neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) for some architectures, [GPU optimized](https://github.com/NVIDIA/caffe/) for some architectures, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
 
+
 Vocabulary I use:
 
 - weights (others call them kernels, filters, parameters, or feature extractors) 
@@ -983,7 +984,7 @@ VOC=/home/ubuntu/voc2012
 
 chmod 700 *.sh
 
-# Download datasets or copy from /files/vol03/projects/Caffe/data/PASCAL_VOC/
+# Download datasets
 # Details: http://host.robots.ox.ac.uk/pascal/VOC/voc2012/index.html#devkit
 if [ ! -f VOCtrainval_11-May-2012.tar ]; then
   wget http://host.robots.ox.ac.uk/pascal/VOC/voc2012/VOCtrainval_11-May-2012.tar
