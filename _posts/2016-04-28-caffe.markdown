@@ -18,7 +18,7 @@ I wrote the content in this blog while I was at [AFRL](http://www.wpafb.af.mil/A
 
 Vocabulary I use:
 
-- weights (others call them kernels, feature extractors, filters, and parameters) 
+- weights (others call them kernels, filters, parameters, or feature extractors) 
 - blob - a 4 dimensional data structure, i.e., a 4D tensor, that contains data, gradients, or weights (including biases)
 - units (others call them neurons) - performs a non-linear transformation on a data blob
 - feature maps (others call them channels)
@@ -1051,26 +1051,27 @@ python average_precision.py
 If using Nvidia GPUs, the appropriate driver's need to be installed. The following steps are based on [this](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) blog. Note that two reboots are required. After following these steps, installation can continue using the steps [above](http://rodriguezandres.github.io/2016/04/28/caffe/#installation) ignoring the installation of Nvidia drivers in those steps.
 
 ~~~ bash
-sudo apt-get install linux-image-extra-virtual
+sudo apt-get install -y linux-image-extra-virtual
 sudo reboot
 # after reboot, disable nouveau
-sudo echo 'blacklist nouveau' >> /etc/modprobe.d/blacklist-nouveau.conf
-sudo echo 'blacklist lbm-nouveau' >> /etc/modprobe.d/blacklist-nouveau.conf
-sudo echo 'options nouveau modeset=0' >> /etc/modprobe.d/blacklist-nouveau.conf
-sudo echo 'alias nouveau off' >> /etc/modprobe.d/blacklist-nouveau.conf
-sudo echo 'alias lbm-nouveau off' >> /etc/modprobe.d/blacklist-nouveau.conf
+echo 'blacklist nouveau' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
+echo 'blacklist lbm-nouveau' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
+echo 'options nouveau modeset=0' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
+echo 'alias nouveau off' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
+echo 'alias lbm-nouveau off' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
 # disable the Kernel nouveau
 echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
 sudo update-initramfs -u
 sudo reboot
 # get Kernel source
-sudo apt-get install linux-source
-sudo apt-get install linux-headers-$(uname -r)
+sudo apt-get install -y linux-source
+sudo apt-get install -y linux-headers-$(uname -r)
 # Download the latests drivers from http://www.nvidia.com/Download/index.aspx
 # (as of May 11, 2016 for the g2 instances with GRID K520 GPUs use the version below)
 DRIVER_VERSION=361.42 # update this line with the latests driver from link above
 NVIDIA_DRIVERS=NVIDIA-Linux-x86_64-$DRIVER_VERSION.run
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/$DRIVER_VERSION/$NVIDIA_DRIVERS
+chmod +x $NVIDIA_DRIVERS
 sudo ./$NVIDIA_DRIVERS
 ~~~
 
