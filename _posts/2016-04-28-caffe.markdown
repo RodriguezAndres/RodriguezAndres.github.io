@@ -29,26 +29,26 @@ A fast way to become familiar with Caffe is:
 
 - [Install](http://rodriguezandres.github.io/2016/04/28/caffe/#installation) it
 - [Train LeNet on MNIST](http://rodriguezandres.github.io/2016/04/28/caffe/#examples)
-- Used a trained model to [test](http://rodriguezandres.github.io/2016/04/28/caffe/#testing) some images from the web
+- Used a trained model to [test](http://rodriguezandres.github.io/2016/04/28/caffe/#testing) some images
 - [Fine-tune](http://rodriguezandres.github.io/2016/04/28/caffe/#fine-tuning) a trained model on the [Cats vs Dogs challenge](http://rodriguezandres.github.io/2016/04/28/caffe/#examples)
 
 ## Installation
 On Ubuntu 14.04. Get dependencies:
 
 ~~~ bash
-sudo apt-get update
-sudo apt-get install -y git build-essential
-sudo apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev 
-sudo apt-get install -y libopencv-dev libhdf5-serial-dev protobuf-compiler
-sudo apt-get install -y --no-install-recommends libboost-all-dev
-sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev
+sudo apt-get update &&
+sudo apt-get install -y git build-essential &&
+sudo apt-get install -y libprotobuf-dev libleveldb-dev libsnappy-dev &&
+sudo apt-get install -y libopencv-dev libhdf5-serial-dev protobuf-compiler &&
+sudo apt-get install -y --no-install-recommends libboost-all-dev &&
+sudo apt-get install -y libgflags-dev libgoogle-glog-dev liblmdb-dev &&
 sudo apt-get install -y libatlas-base-dev # not needed if installing MKL or OpenBLAS
 ~~~
 
 Reasons for dependencies ([source](http://graphics.cs.cmu.edu/courses/16-824/2016_spring/slides/caffe_tutorial.pdf)):
 
-- boost`: a C++ library used for its math functions and shared pointer.
-- glog`, `gflags`: provides logging & command line utilities. Essential for debugging.
+- `boost`: a C++ library used for its math functions and shared pointer.
+- `glog`, `gflags`: provides logging & command line utilities. Essential for debugging.
 - `leveldb`, `lmdb`: database IO. Use for preparing your own data.
 - `protobuf`: used to efficiently define data structure.
 - `BLAS` (Basic Linear Algebra Subprograms): operations like matrix multiplication, matrix addition, provided by MKL (Intel), ATLAS, openBLAS, etc.
@@ -66,6 +66,8 @@ echo 'source /opt/intel/bin/compilervars.sh intel64' >> ~/.bashrc
 The next set of instructions are only needed if using Nvidia GPUs. The GPU device should have CUDA [compute capability](https://en.wikipedia.org/wiki/CUDA#Supported_GPUs) >= 3.0. Devices with compute capability < 3.0 may have to reduce CUDA thread numbers and batch sizes due to hardware constraints.
 
 Note that in AWS, installing the Nvidia drivers will require additional steps. If using AWS, follow the steps in the [AWS section](http://rodriguezandres.github.io/2016/04/28/caffe/#aws) prior to installing the drivers.
+
+In order to take advantage of GPU optimized Caffe functions, download and install the [cuDNN library](https://developer.nvidia.com/cudnn) after these instructions.
 
 ~~~ bash
 CUDA_VER=7.5 # modify to current version
@@ -95,10 +97,12 @@ echo 'export PATH=/usr/local/cuda-'$CUDA_VER'/bin:$PATH' >> ~/.bashrc
 echo 'export LD_LIBRARY_PATH=/usr/local/cuda-'$CUDA_VER'/lib64:$LD_LIBRARY_PATH' >> ~/.bashrc
 
 # The rest of these lines are OPTIONAL
-rm $CUDAFILE 
-cd ~/cuda/1_Utilities/deviceQuery
-make
+mv NVIDIA* cuda* nvidia_installers/.
+# rm -r nvidia_installers # to clear space
+cd /usr/local/cuda-$CUDA_VER/samples/1_Utilities/deviceQuery
+sudo make
 ./deviceQuery # queries the GPU
+sudo make clean
 nvidia-smi # returns GPU information
 ~~~
 
@@ -106,19 +110,17 @@ Downloading and installing Caffe. Note that in addition to the functionalities f
 
 ~~~ bash
 cd ~
-source .bashrc
 # For BVLC caffe use:
 # git clone https://github.com/BVLC/caffe.git
 # For intelcaffe use:
 git clone https://github.com/intelcaffe/caffe.git 
 cd caffe
 echo "export CAFFE_ROOT=`pwd`" >> ~/.bashrc
+source ~/.bashrc
 cp Makefile.config.example Makefile.config
 
 # Open Makefile.config and modify it (see comments in the Makefile)
 vi Makefile.config
-# To run on GPU using the cuDNN library, uncomment
-# # USE_CUDNN := 1
 # To run on CPU only and to avoid installing CUDA installers, uncomment
 # # CPU_ONLY := 1
 # To use MKL, replace atlas with mkl as follows
@@ -130,6 +132,8 @@ vi Makefile.config
 # # USE_MKL2017_AS_DEFAULT_ENGINE := 1
 # and also (temporarily--this will become the default in future releases)
 # # COMMON_FLAGS += -DUSE_MKL2017_NEW_API
+# To run on GPU using the cuDNN library, uncomment
+# # USE_CUDNN := 1
 
 # Make
 NUM_CORES=$(grep 'core id' /proc/cpuinfo | sort -u | wc -l)
@@ -145,7 +149,6 @@ sudo pip install scikit-image #depends on other packages
 sudo ln -s /usr/include/python2.7/ /usr/local/include/python2.7
 sudo ln -s /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/ \
   /usr/local/include/python2.7/numpy
-echo 'sudo ln /dev/null /dev/raw1394' >> ~/.bashrc
 make pycaffe -j NUM_CORES
 echo 'export PYTHONPATH=$CAFFE_ROOT/python' >> ~/.bashrc
 
@@ -155,8 +158,8 @@ make runtest #"YOU HAVE <some number> DISABLED TESTS" output is OK
 
 # The step below is OPTIONAL
 # it disables cam hardware OpenCV driver; alternatively, the user can skip this
-# and ignore the libdc1394 error that would occassionally appeared
-echo 'export sudo ln /dev/null /dev/raw1394' >> ~/.bashrc
+# and ignore the harmless libdc1394 error that may occassionally appears
+sudo ln /dev/null /dev/raw1394
 ~~~
 
 ## Dataset preparation
@@ -1052,7 +1055,7 @@ python average_precision.py
 If using Nvidia GPUs, the appropriate driver's need to be installed. The following steps are based on [this](http://tleyden.github.io/blog/2014/10/25/cuda-6-dot-5-on-aws-gpu-instance-running-ubuntu-14-dot-04/) blog. Note that two reboots are required. After following these steps, installation can continue using the steps [above](http://rodriguezandres.github.io/2016/04/28/caffe/#installation) ignoring the installation of Nvidia drivers in those steps.
 
 ~~~ bash
-sudo apt-get install -y linux-image-extra-virtual
+sudo apt-get install -y linux-image-extra-virtual &&
 sudo reboot
 # after reboot, disable nouveau
 echo 'blacklist nouveau' | sudo tee -a /etc/modprobe.d/blacklist-nouveau.conf
@@ -1065,7 +1068,7 @@ echo options nouveau modeset=0 | sudo tee -a /etc/modprobe.d/nouveau-kms.conf
 sudo update-initramfs -u
 sudo reboot
 # get Kernel source
-sudo apt-get install -y linux-source
+sudo apt-get install -y linux-source &&
 sudo apt-get install -y linux-headers-$(uname -r)
 # Download the latests drivers from http://www.nvidia.com/Download/index.aspx
 # (as of May 11, 2016 for the g2 instances with GRID K520 GPUs use the version below)
@@ -1073,7 +1076,7 @@ DRIVER_VERSION=361.42 # update this line with the latests driver from link above
 NVIDIA_DRIVERS=NVIDIA-Linux-x86_64-$DRIVER_VERSION.run
 wget http://us.download.nvidia.com/XFree86/Linux-x86_64/$DRIVER_VERSION/$NVIDIA_DRIVERS
 chmod +x $NVIDIA_DRIVERS
-sudo ./$NVIDIA_DRIVERS
+sudo ./$NVIDIA_DRIVERS # some warnings may appear
 ~~~
 
 <h4>Mounting a volume to an EC2 instance</h4>
