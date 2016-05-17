@@ -420,7 +420,8 @@ Training requires:
 
 - `train_val.prototxt`: defines the network architecture, initialization parameters, and local learning rates
 - `solver.prototxt`: defines optimization/training parameters and serves as the actual file that's called to train a deep network
-- (`deploy.prototxt`: actually this is used only in testing; is similar to train_val.prototxt but without the local learning rates, initialization values, and data layer)
+- (`deploy.prototxt`: actually this is used only in testing; it must be exactly the same as `train_val.prototxt` except from the input layer(s), loss layer(s), and weights initialization (.e.,g `weight_filler`) as the latter two do not exist in `deploy.prototxt`).
+is similar to train_val.prototxt but without the local learning rates, initialization values, and data layer)
 
 Note that it is common but not required to have the same name for the layer and the blob coming out of the layer, i.e., in the prototxt files in each layer `name` and `top` are usually the same.
 
