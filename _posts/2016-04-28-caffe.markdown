@@ -8,13 +8,13 @@ mathjax: true
 
 "It is comparatively easy to make computers exhibit adult-level performance on intelligence tests or playing checkers, and difficult or impossible to give them the skills of a 1-year-old when it comes to perception and mobility." ~Hans Moravec
 
-I wrote the content in this blog while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) (excluding some minor recent additions) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) from my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my employeer (current or previous).
+I wrote most of the content in this blog while I was at [AFRL](http://www.wpafb.af.mil/AFRL/) with the collaboration of [Sam Sakla](https://www.linkedin.com/in/wesamsakla), James Patrick, and [H. Scott Clouse](http://scottclouse.com) from my AFRL deep learning team. It was written for Caffe newbies and was approved for public released: 88ABW-2015-5479. The views expressed here are my opinion and do not reflect the opinion or position or endorsement of my current employeer Intel Corporation or my previous employer AFRL.
 
 * TOC
 {:toc}
 
 ## Summary
-[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and Matlab wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term *neural* because it gives the impression that it resembles a biological neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) for some architectures, [GPU optimized](https://github.com/NVIDIA/caffe/) for some architectures, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
+[Caffe](http://caffe.berkeleyvision.org/) is a deep learning framework developed by the Berkeley Vision and Learning Center ([BVLC](http://caffe.berkeleyvision.org/)). It is written in C++ and CUDA C++ with Python and MATLAB wrappers. Out of the box it is especially useful for convolutional neural networks. On a side note, I dislike the term *neural* because it gives the impression that it resembles a biological neuron -- let the neuroscientist worry about that and not the computer scientists (steping down the soapbox). There are various forks of the main Caffe [branch](https://github.com/BVLC/caffe/tree/master) that support [LSTM and image captioning](https://github.com/BVLC/caffe/pull/3948), [multinode training and CPU optimized](https://github.com/intelcaffe/caffe/) for some architectures, [GPU optimized](https://github.com/NVIDIA/caffe/) for some architectures, [detection and classification](https://github.com/rbgirshick/py-faster-rcnn), [segmentation](https://github.com/shelhamer/fcn.berkeleyvision.org), and [Spark](https://github.com/yahoo/CaffeOnSpark) compatible.
 
 
 Vocabulary I use:
@@ -149,8 +149,9 @@ sudo pip install scikit-image #depends on other packages
 sudo ln -s /usr/include/python2.7/ /usr/local/include/python2.7
 sudo ln -s /usr/local/lib/python2.7/dist-packages/numpy/core/include/numpy/ \
   /usr/local/include/python2.7/numpy
+cd ~/caffe
 make pycaffe -j NUM_CORES
-echo 'export PYTHONPATH=$CAFFE_ROOT/python' >> ~/.bashrc
+echo "export PYTHONPATH=$CAFFE_ROOT/python" >> ~/.bashrc
 
 # The steps below are OPTIONAL to test caffe (recommended 1st time only)
 make test -j $NUM_CORES
@@ -162,12 +163,234 @@ make runtest #"YOU HAVE <some number> DISABLED TESTS" output is OK
 sudo ln /dev/null /dev/raw1394
 ~~~
 
+## Data Layer
+This section is optional. Understanding it is not require to start using Caffe. It is written for the user that plan to use various data formats. The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorials.
+
+Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or lmdb), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats. In this section we discuss the various types of data layers types.
+
+
+Common input preprocessing (mean subtraction, scaling, random cropping, and mirroring) is available by specifying `transform_params` (not supported in all data types, e.g., HDF5). If the required data transformations are performend beforehand, then there is no need to use this option in the data layer.
+
+The following are possible types of data layers.
+
+<h4>Data</h4>
+Lightning memory-mapped databases ([lmdb](http://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database)) and [LevelDB](https://en.wikipedia.org/wiki/LevelDB) database formats can be efficiently process as input data. They are only good for 1-of-k classification. These are the recommended data formats for 1-of-k classification due to the efficiency of Caffe in reading the dataset.
+
+Parameters
+
+- Required
+  - `source`: the name of the directory containing the database
+  - `batch_size`: the number of inputs to process at one time
+- Optional
+  - `backend` [default LEVELDB]: choose whether to use a LEVELDB or LMDB
+  - `rand_skip`: skip this number of inputs at the beginning; maybe useful for async sgd
+
+In this example the images are cropped, mirrored, and have the mean subtracted.
+
+~~~ bash
+layer {
+  name: "data"
+  type: "Data"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    # randomly horizontally mirror the image
+    mirror: 1
+    # crop a `crop_size` x `crop_size` patch:
+    # - at random during training
+    # - from the center during testing
+    crop_size: 227
+    # these mean_values can equivalently be replaced with a mean.binaryprotot file
+    mean_value: 104
+    mean_value: 117
+    mean_value: 123
+  }
+  data_param {
+    source: "examples/imagenet/ilsvrc12_train_lmdb"
+    batch_size: 32
+    backend: LMDB
+  }
+}
+~~~
+
+Note that it is common but not required to have the same name for the layer and the blob coming out of the layer, i.e., in the prototxt files in each layer `name` and `top` are usually the same. More on prototxt files in the [Training](http://rodriguezandres.github.io/2016/04/28/caffe/#training) section.
+
+Alternatively the mean can be substracted by passing a mean image and replacing all the mean_value lines with `mean_file: "data/ilsvrc12/imagenet_mean.binaryproto"`. This file can be created from an lmdb dataset as follows:
+
+~~~ bash
+cd ~/caffe
+build/tools/compute_image_mean /path/to/mydataset_train_lmdb /path/to/mean/file/train_mean.binaryproto
+~~~
+
+
+<h4>ImageData</h4>
+Get images and labels directly from image files.
+
+~~~ bash
+layer {
+  name: "data"
+  type: "ImageData"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  transform_param {
+    mirror: true
+    crop_size: 227
+    mean_value: 104
+    mean_value: 117
+    mean_value: 123
+  }
+  image_data_param {
+    source: "/home/ubuntu/datasets/ilsvrc12/train.txt"
+    batch_size: 32
+  }
+}
+~~~
+
+
+<h4>Input</h4>
+Uses a blob of zeros as input data with the dimensions specified. This is usually used to time the forward and backward propogations. More on timing a network at the end of the [Training](http://rodriguezandres.github.io/2016/04/28/caffe/#training) section.
+
+~~~ bash
+layer {
+  name: "input"
+  type: "Input"
+  top: "data"
+  input_param {
+    shape {
+      dim: 32
+      dim: 3
+      dim: 227
+      dim: 227
+    }
+  }
+}
+~~~~
+
+Equivalently, the layer can be written as
+
+~~~ bash
+input: "data"
+input_dim: 32
+input_dim: 3
+input_dim: 227
+input_dim: 227
+~~~
+
+<h4>DummyData</h4>
+Similar to Input except the type of data can be specified. This is usually used for debugging but can also be used to time the forward and backward propogations. Example based on [this](https://github.com/BVLC/caffe/blob/master/examples/pycaffe/linreg.prototxt) one.
+
+~~~ bash
+layer {
+  name: "data"
+  type: "DummyData"
+  top: "data"
+  include {
+    phase: TRAIN
+  }
+  dummy_data_param {
+    data_filler {
+      type: "constant"
+      value: 0.01
+    }
+    shape {
+      dim: 32
+      dim: 3
+      dim: 227
+      dim: 227
+    }
+  }
+}
+layer {
+  name: "data"
+  type: "DummyData"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  dummy_data_param {
+    data_filler {
+      type: "constant"
+    }
+    shape {
+      dim: 32
+    }
+  }
+}
+~~~
+
+<h4>MemoryData</h4>
+The memory data layer reads data directly from memory, without copying it. In order to use it, one must call `MemoryDataLayer::Reset` (from C++) or `Net.set_input_arrays` (from Python) in order to specify a source of contiguous data (as 4D row major array), which is read one batch-sized chunk at a time.
+
+This is the most efficient method as it assumes that data is already in memory. However, it can be slow as it may require copying the data into memory prior to using it.
+
+Parameters
+
+- Required
+  - `batch_size`, `channels`, `height`, `width`: specify the size of input chunks to read from memory 
+
+~~~ bash
+layers {
+  name: "data"
+  type: MEMORY_DATA
+  top: "data"
+  top: "label"
+  memory_data_param {
+   batch_size: 32
+   channels: 3
+   height: 227
+   width: 227
+  }
+ transform_param {
+    crop_size: 227
+    mirror: true
+    mean_file: "mean.binaryproto"
+  }
+~~~
+
+<h4>HDF5Data</h4>
+Reads arbitrary data from HDF5 files. Good for any task but only uses FP32 and FP64 data (not uint8), so image data will be huge. Does not allow `transform_param`. Only use this if you have to.
+
+Parameters
+
+- Required
+  - source: the name of the file to read from
+  - batch_size
+
+~~~ bash
+layer {
+  name: "data"
+  type: "HDF5_DATA"
+  top: "data"
+  top: "label"
+  include {
+    phase: TRAIN
+  }
+  hdf5_data_param {
+    source: "examples/hdf5_classification/data/train.txt"
+    batch_size: 32
+    backend: LMDB
+  }
+}
+~~~
+
+<h4>HDF5DataOutput</h4>
+The HDF5 output layer performs the opposite function of the other layers in this section: it writes its input blobs to disk.
+
+<h4>WindowData</h4>
+Made for detection. Read windows from image files class labels.
+
+
+
 ## Dataset preparation
-Training and validation in Caffe is performed with the data stored in a set of Lightning Memory-Mapped Databases ([lmdb](http://en.wikipedia.org/wiki/Lightning_Memory-Mapped_Database)). The training/validation can be performed on data that's in common image formats or HDF5, however, incurring a loss of efficiency.
+The recommended data format for 1-of-k classification is lmdb. In order to use Caffe's tools to convert datasets to lmdbs the following are required:
 
-In order to use Caffe's tools to convert datasets to lmdbs the following is required:
-
-- A folder with the images
+- A folder with the data
 - The output folders, e.g., mydataset_train_lmdb, must be non-existent
 - A text file with the image file names and corresponding labels, e.g., "train.txt" looks like
 
@@ -178,7 +401,9 @@ img3425.jpg 8
 ...
 ~~~
 
-For example, the [create_label_file.py](https://github.com/RodriguezAndres/Kaggle-dogs-vs-cats/blob/master/create_label_file.py) script creates a training and validation text file for [Kaggle's Dog vs Cats](https://www.kaggle.com/c/dogs-vs-cats/data) competition.
+Note that if the data is dispersed in various folders, the train.txt can contain the full path to the data points.
+
+The [create_label_file.py](https://github.com/RodriguezAndres/Kaggle-dogs-vs-cats/blob/master/create_label_file.py) is a simple script that creates a training and validation text file for [Kaggle's Dog vs Cats](https://www.kaggle.com/c/dogs-vs-cats/data) competition and can easily be adapted to other tasks.
 
 Note that in testing we assume that the labels are missing. If labels are available these same steps can be applied to prepare an lmdb test dataset.
 
@@ -263,156 +488,49 @@ plt.show()
 <h4>Preparing data with various channels</h4>
 Gray scale images (1-channel), RADAR images (2-channels), videos (4 channels), image+depth (4 channels), vibrometry (1 channel), and spectrograms (1-channel) required a wrapper in order to set the lmdb dataset (see [this blog script](https://github.com/BVLC/caffe/issues/1698#issuecomment-70211045) as a guide).
 
-<h3>Data Layer</h3>
-Optional material, i.e., understanding this section is not critical to learning to train networks. The material in this section is based on [this](http://caffe.berkeleyvision.org/tutorial/layers.html) and [this](http://vision.stanford.edu/teaching/cs231n/slides/caffe_tutorial.pdf) tutorial. Data enters Caffe through data layers: they lie at the bottom of nets. Data can come from efficient databases (LevelDB or LMDB), directly from memory, or, when efficiency is not critical, from files on disk in HDF5 or common image formats.
+<h4>Resizing images</h4>
+There are two common approaches to resizing images:
 
-Common input preprocessing (mean subtraction, scaling, random cropping, and mirroring) is available by specifying `transform_params` (not supported in all data types, e.g., HDF5). If the required data transformations are performend beforehand, then there is no need to use this option in the data layer.
+- warp an image to the desired size
+- proportionally resize with the smaller size being the desired size, and then center crop the large side to the desired size
 
-Note that it is common but not required to have the same name for the layer and the blob coming out of the layer, i.e., in the prototxt files in each layer `name` and `top` are usually the same.
+Resizing can occur in a number of ways:
+ 
+- via OpenCV as part making the lmdb file, e.g., `build/tools/convert_imageset --resize_height=256 --resize_width=256`; resize is first proportional and then center crop.
+- via ImageMagick, e.g., `convert -resize 256x256 <input_img> <output_img>`; warps image to desired size
+- via OpenCV using a script that allows for multithreading image conversion in `tools/extra/resize_and_crop_images.py`; warps image to desired size. This requires:
 
-<h4>Data</h4>
-LMDB and LevelDB database formats can be efficiently process as input data. Only good for 1-of-k classification. Use this if possible.
+~~~ bash
+sudo pip install git+https://github.com/Yangqing/mincepie.git
+sudo apt-get install -y python-opencv
+vi tools/extra/launch_resize_and_crop_images.sh # set number of clients -> num of cores*2; file.txt, input, and output folders
+~~~
 
-Parameters
-
-- Required
-  - `source`: the name of the directory containing the database
-  - `batch_size`: the number of inputs to process at one time
-- Optional
-  - `backend` [default LEVELDB]: choose whether to use a LEVELDB or LMDB
-  - `rand_skip`: skip this number of inputs at the beginning; maybe useful for async sgd
-
-In this example the images are cropped, mirrored, and have the mean subtracted.
+In addition, as part of the data layer the images can be crop or resized, e.g.,
 
 ~~~ bash
 layer {
   name: "data"
-  type: "Data"
-  top: "data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
   transform_param {
-    mirror: 1 # 1 = on, 0 = off
-    # crop a `crop_size` x `crop_size` patch:
-    # - at random during training
-    # - from the center during testing
     crop_size: 227
-    mean_value: 104
-    mean_value: 117
-    mean_value: 123
-  }
-  data_param {
-    source: "examples/imagenet/ilsvrc12_train_lmdb"
-    batch_size: 32
-    backend: LMDB
-  }
+...
 }
 ~~~
 
-<h4>MemoryData</h4>
-The memory data layer reads data directly from memory, without copying it. In order to use it, one must call `MemoryDataLayer::Reset` (from C++) or `Net.set_input_arrays` (from Python) in order to specify a source of contiguous data (as 4D row major array), which is read one batch-sized chunk at a time.
-
-This is the most efficient method as it assumes that data is already in memory. However, it can be slow as it may require manually copying the data into memory prior to using it.
-
-Parameters
-
-- Required
-  - `batch_size`, `channels`, `height`, `width`: specify the size of input chunks to read from memory 
-
-~~~ bash
-layers {
-  name: "data"
-  type: MEMORY_DATA
-  top: "data"
-  top: "label"
-  memory_data_param {
-   batch_size: 32
-   channels: 3
-   height: 227
-   width: 227
-  }
- transform_param {
-    crop_size: 227
-    mirror: true
-    mean_file: "mean.binaryproto"
-  }
-~~~
-
-<h4>HDF5Data</h4>
-Reads arbitrary data from HDF5 files. Good for any task but only uses FP32 and FP64 data (not uint8), so image data will be huge. Does not allow `transform_param`. Only use this if you have to.
-
-Parameters
-
-- Required
-  - source: the name of the file to read from
-  - batch_size
+crops an image (at random during during training and the center image during testing), and
 
 ~~~ bash
 layer {
   name: "data"
-  type: "HDF5_DATA"
-  top: "data"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-  hdf5_data_param {
-    source: "examples/hdf5_classification/data/train.txt"
-    batch_size: 32
-    backend: LMDB
-  }
+  image_data_param {
+    new_height: 227
+    new_width: 227
+...
 }
 ~~~
 
-<h4>HDF5DataOutput</h4>
-The HDF5 output layer performs the opposite function of the other layers in this section: it writes its input blobs to disk.
+warps the image to the new_height or new_width using OpenCV. When the input is square (it usually is at this point) the warping is therefore proportional.
 
-
-<h4>ImageData</h4>
-Get images and labels directly from image files.
-
-
-<h4>WindowData</h4>
-Made for detection. Read windows from image files class labels.
-
-<h4>DummyData</h4>
-Used in debugging.
-
-Example based on [this](https://github.com/BVLC/caffe/blob/master/examples/pycaffe/linreg.prototxt) one.
-
-~~~ bash
-layer {
-  name: "data"
-  type: "DummyData"
-  top: "data"
-  include {
-    phase: TRAIN
-  }
-  dummy_data_param {
-    data_filler {
-      type: "constant"
-      value: 0.01
-    }
-    shape { dim: 32 dim: 3 dim: 224 dim: 224 }
-  }
-}
-layer {
-  name: "data"
-  type: "DummyData"
-  top: "label"
-  include {
-    phase: TRAIN
-  }
-  dummy_data_param {
-    data_filler {
-      type: "constant"
-    }
-    shape { dim: 32 }
-  }
-}
-~~~
 
 
 ## Training
