@@ -16,12 +16,12 @@ on Ubuntu 14.04
 ~~~ bash
 # Adding the ruby repository
 sudo apt-get install software-properties-common
-sudo apt-add-repository ppa:brightbox/ruby-ng
+sudo apt-add-repository ppa:brightbox/ruby-ng #may require sudo -E
 sudo apt-get update
 # Installing necessary packages
 sudo apt-get install ruby2.2 ruby2.2-dev make gcc nodejs git
-sudo gem update --system
-sudo gem install jekyll
+sudo gem update --system #may require sudo -E
+sudo gem install jekyll #may require sudo -E
 ~~~ 
 
 - Get a [GitHub](http://github.com) account with some *username*
@@ -39,6 +39,14 @@ From the folder <code>*username*.github.io</code>
 jekyll new . # only for new projects
 jekyll serve
 ~~~ 
+
+If using vagrant add this line to the Vagrantfile 
+
+~~~ bash
+config.vm.network "forwarded_port", guest: 4000, host: 4000
+~~~
+
+and instead of just `jekyll serve` type `jekyll serve --host 0.0.0.0`
 
 - Browse to [http://localhost:4000](http://localhost:4000) to view blog locally
 - Create posts like this one under `myblog/_post` named `yyyy-mm-dd-name-of-file.markdown`
