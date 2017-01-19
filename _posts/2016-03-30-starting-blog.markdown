@@ -6,6 +6,8 @@ date:   2016-03-30 01:00:00
 mathjax: true
 ---
 
+This guide shows how to install and use Jekyll. I added a few steps that I needed to do because I use vagrant and I am behind a proxy server but the reader can ignore those steps.
+
 * TOC
 {:toc}
 
@@ -67,6 +69,8 @@ Git creates a local repository. Files can be *added* and *committed* to the loca
 First time push...
 
 ~~~ bash
+git git config --global user.email "you@example.com"
+git config --global user.name "Your Name"
 git add --all
 git commit -m "new blog post"
 git push -u origin master
