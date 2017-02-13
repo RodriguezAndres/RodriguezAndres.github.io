@@ -59,7 +59,7 @@ c.NotebookApp.password = u'$key'" .jupyter/jupyter_notebook_config.py
 jupyter notebook
 ~~~
 
-I observed that by having all the lines in `.jupyter/jupyter_notebook_config.py` commented out except for the three lines above, I am able to access Jupyter even behind a firewall.
+I observed that by having all the lines in `.jupyter/jupyter_notebook_config.py` commented out except for the three lines above, I am able to access the Jupyter notebook even behind a firewall.
 
 ## Set Jupyter to start when instance boots
 Add the following line right before the `exit 0` line in `\etc\rc.local`
