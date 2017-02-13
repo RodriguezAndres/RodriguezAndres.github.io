@@ -20,7 +20,7 @@ Start a brand new Ubuntu 16.04 LTS AMI. When launching an AMI, use the following
   - Source: Custom 0.0.0.0/0
 - Type: SSH
   - Protocol: TCP
-  - Port Range: 20
+  - Port Range: 22
   - Source: Custom 0.0.0.0/0
 
 ## Jupyter setup
@@ -58,6 +58,8 @@ c.NotebookApp.open_browser = False\\
 c.NotebookApp.password = u'$key'" .jupyter/jupyter_notebook_config.py
 jupyter notebook
 ~~~
+
+I observed that by having all the lines in `.jupyter/jupyter_notebook_config.py` commented out except for the three lines above, I am able to access Jupyter even behind a firewall.
 
 ## Set Jupyter to start when instance boots
 Add the following line right before the `exit 0` line in `\etc\rc.local`
